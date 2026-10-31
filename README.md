@@ -114,6 +114,17 @@ Open your browser at `http://localhost:80` (or the port defined in `$PORT`).
 
 ---
 
+### 💻 Modern Web UI & Fluid Experience
+CanonicalRAG includes a clean, single-page reactive dashboard with zero heavy frontend build dependencies (Tailwind CSS CDN + FontAwesome):
+- **🌓 Light & Dark Themes:** Smooth palette transitions persisted in local storage.
+- **🌐 Bilingual Support (EN / PT):** Instant toggle between English and Portuguese for all interfaces, labels, and modals.
+- **📖 Distraction-Free Technical Reports:** One-click "Hide Sources" toggle expanding the technical report to full width for fluid reading.
+- **📑 Automated Report Export:** Download structured reports as clean Markdown (`.md`) or print to PDF with print-optimized styling that strips telemetry and query controls.
+- **💡 Contextual Related Queries:** Dynamic generation of suggested follow-up queries based on analyzed technical keywords.
+- **⚡ Compact Real-Time Telemetry:** Continuous header telemetry (2s poll) displaying live CPU load, RAM usage, disk storage, and cumulative token savings.
+
+---
+
 ### 📁 Project Structure
 
 ```
@@ -154,6 +165,13 @@ O **CanonicalRAG** é uma engine de **Recuperação Aumentada por Geração (RAG
    - Consultas com o mesmo sentido semântico são normalizadas e respondem em **< 10ms com zero chamadas de API**.
 4. **Gateway Multi-LLM Resiliente:**
    - Suporte nativo a Anthropic Claude (com Prompt Caching efêmero), Google Gemini, OpenRouter (modelos gratuitos `:free`) e Cloudflare Workers AI.
+5. **Interface Web Moderna e Fluida:**
+   - **Temas Claro e Escuro (Light & Dark):** Alternância instantânea com persistência local.
+   - **Bilingue (Inglês e Português):** Suporte completo de i18n em todos os painéis e abas.
+   - **Leitura Fluida & Focada:** Botão de "Ocultar Fontes" para expandir o relatório técnico em tela cheia (100% de largura).
+   - **Exportação Automatizada:** Download imediato em Markdown (`.md`) e impressão limpa / PDF sem barras de controle ou menus.
+   - **Consultas Relacionadas Sugeridas:** Sugestões contextuais automáticas baseadas nos termos pesquisados.
+   - **Barra de Telemetria Ultracompacta:** Monitoramento contínuo em tempo real (CPU, RAM, Disco e Economia de Tokens).
 
 ---
 
