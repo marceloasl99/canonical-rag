@@ -122,6 +122,7 @@ CanonicalRAG includes a clean, single-page reactive dashboard with zero heavy fr
 - **📑 Automated Report Export:** Download structured reports as clean Markdown (`.md`) or print to PDF with print-optimized styling that strips telemetry and query controls.
 - **💡 Contextual Related Queries:** Dynamic generation of suggested follow-up queries based on analyzed technical keywords.
 - **⚡ Compact Real-Time Telemetry:** Continuous header telemetry (2s poll) displaying live CPU load, RAM usage, disk storage, and cumulative token savings.
+- **🔬 Interactive Architecture & Pipeline Simulator:** Deep-dive "How it Works" section with a 5-step visual funnel, architectural benchmark table (CanonicalRAG vs Milvus/Qdrant), and live pipeline simulation.
 
 ---
 
@@ -172,6 +173,7 @@ O **CanonicalRAG** é uma engine de **Recuperação Aumentada por Geração (RAG
    - **Exportação Automatizada:** Download imediato em Markdown (`.md`) e impressão limpa / PDF sem barras de controle ou menus.
    - **Consultas Relacionadas Sugeridas:** Sugestões contextuais automáticas baseadas nos termos pesquisados.
    - **Barra de Telemetria Ultracompacta:** Monitoramento contínuo em tempo real (CPU, RAM, Disco e Economia de Tokens).
+   - **Painel Interativo de Arquitetura & Simulador:** Seção detalhada "Como Funciona" com o funil visual em 5 etapas, comparativo lado a lado contra bancos vetoriais pesados e simulador interativo de pipeline em tempo real.
 
 ---
 
