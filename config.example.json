@@ -1,0 +1,101 @@
+{
+  "settings": {
+    "documents_folder": "data/documents",
+    "chunk_size": 800,
+    "chunk_overlap": 150,
+    "default_provider": "gemini",
+    "round_robin_enabled": true,
+    "fallback_enabled": true,
+    "strict_grounding": true,
+    "temperature": 0.2,
+    "max_tokens": 4000,
+    "language": "pt-BR"
+  },
+  "active_models": [
+    {
+      "id": "slot-1",
+      "label": "Modelo Ativo 1 (Principal)",
+      "provider": "gemini",
+      "model_id": "gemini-2.5-flash",
+      "reasoning_effort": "low",
+      "temperature": 0.2,
+      "active": true
+    },
+    {
+      "id": "slot-2",
+      "label": "Modelo Ativo 2 (Secundário)",
+      "provider": "openrouter",
+      "model_id": "google/gemini-2.0-flash-exp:free",
+      "reasoning_effort": "none",
+      "temperature": 0.2,
+      "active": false
+    },
+    {
+      "id": "slot-3",
+      "label": "Modelo Ativo 3 (Reserva)",
+      "provider": "claude",
+      "model_id": "claude-haiku-5-5",
+      "reasoning_effort": "none",
+      "temperature": 0.2,
+      "active": false
+    }
+  ],
+  "providers": {
+    "gemini": {
+      "name": "gemini",
+      "label": "Google Gemini",
+      "active": true,
+      "default_model": "gemini-2.5-flash",
+      "available_models": [
+        "gemini-2.5-flash",
+        "gemini-2.5-pro",
+        "gemini-2.0-flash"
+      ],
+      "keys": []
+    },
+    "claude": {
+      "name": "claude",
+      "label": "Anthropic Claude",
+      "active": true,
+      "default_model": "claude-haiku-5-5",
+      "available_models": [
+        "claude-haiku-5-5",
+        "claude-3-5-haiku-latest",
+        "claude-3-7-sonnet-latest"
+      ],
+      "keys": []
+    },
+    "openrouter": {
+      "name": "openrouter",
+      "label": "OpenRouter (Modelos Gratuitos e Pagos)",
+      "active": true,
+      "default_model": "google/gemini-2.0-flash-exp:free",
+      "available_models": [],
+      "keys": []
+    },
+    "cloudflare": {
+      "name": "cloudflare",
+      "label": "Cloudflare Workers AI",
+      "active": false,
+      "default_model": "@cf/meta/llama-3.3-70b-instruct",
+      "account_id": "",
+      "keys": []
+    },
+    "groq": {
+      "name": "groq",
+      "label": "Groq",
+      "active": false,
+      "default_model": "llama-3.3-70b-versatile",
+      "base_url": "https://api.groq.com/openai/v1",
+      "keys": []
+    },
+    "openai": {
+      "name": "openai",
+      "label": "OpenAI / Custom Endpoint",
+      "active": false,
+      "default_model": "gpt-4o-mini",
+      "base_url": "https://api.openai.com/v1",
+      "keys": []
+    }
+  }
+}

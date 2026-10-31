@@ -1,0 +1,1214 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CanonicalRAG - Sistema de Consulta Canônica & Relatórios</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            brand: { 50: '#f5f3ff', 500: '#8b5cf6', 600: '#7c3aed', 700: '#6d28d9', 900: '#4c1d95' },
+            dark: { 800: '#1e1e2d', 850: '#161623', 900: '#0f0f17' }
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    body { background-color: #0f0f17; color: #e2e8f0; font-family: ui-sans-serif, system-ui, sans-serif; }
+    .tab-btn.active { border-bottom: 2px solid #8b5cf6; color: #a78bfa; font-weight: 600; }
+    #report-content h1 { font-size: 1.25rem; font-weight: 700; color: #fff; margin-top: 1rem; margin-bottom: 0.5rem; }
+    #report-content h2 { font-size: 1.1rem; font-weight: 600; color: #c4b5fd; margin-top: 0.85rem; margin-bottom: 0.4rem; }
+    #report-content h3 { font-size: 0.95rem; font-weight: 600; color: #e2e8f0; margin-top: 0.6rem; margin-bottom: 0.3rem; }
+    #report-content p { margin-bottom: 0.75rem; line-height: 1.6; }
+    #report-content ul { list-style-type: disc; margin-left: 1.25rem; margin-bottom: 0.75rem; }
+    #report-content li { margin-bottom: 0.25rem; }
+    #report-content table { width: 100%; border-collapse: collapse; margin-bottom: 1rem; font-size: 0.75rem; }
+    #report-content th, #report-content td { border: 1px solid #374151; padding: 0.4rem 0.6rem; text-align: left; }
+    #report-content th { background-color: #1f2937; color: #f3f4f6; }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col">
+
+  <!-- Header -->
+  <header class="border-b border-gray-800 bg-dark-850 px-4 py-2.5 flex flex-wrap items-center justify-between gap-3 shadow-lg">
+    <div class="flex items-center space-x-3">
+      <div class="w-8 h-8 rounded-lg bg-brand-600 flex items-center justify-center text-white text-base font-bold shadow-md shadow-brand-500/20">
+        <i class="fa-solid fa-layer-group"></i>
+      </div>
+      <div>
+        <h1 class="text-base font-bold tracking-tight text-white flex items-center gap-1.5 leading-none">
+          CanonicalRAG <span class="text-[10px] px-1.5 py-0.2 rounded bg-brand-900/60 text-brand-400 border border-brand-500/30">v2.5 Universal</span>
+        </h1>
+        <p class="text-[11px] text-gray-400 leading-tight">RAG Canônico & Mini-LLM FlashRank</p>
+      </div>
+    </div>
+
+    <!-- Telemetria do Sistema e Consumo (Compacta) -->
+    <div class="flex items-center gap-1.5 text-[11px] font-mono bg-dark-900/90 border border-gray-800 px-2.5 py-1 rounded-lg text-gray-300">
+      <div class="flex items-center gap-1 text-emerald-400" title="Tokens Economizados no Total">
+        <i class="fa-solid fa-bolt text-[10px]"></i>
+        <span>Economia: <strong id="top-tok-saved">0</strong> tok</span>
+      </div>
+      <span class="text-gray-700">|</span>
+      <div class="flex items-center gap-1 text-sky-400" title="Tokens estimados na consulta/prompt atual">
+        <i class="fa-solid fa-coins text-[10px]"></i>
+        <span>Prompt: <strong id="top-tok-prompt">0</strong> tok</span>
+      </div>
+      <span class="text-gray-700">|</span>
+      <div class="flex items-center gap-1 text-amber-300" title="Uso de CPU (atualizado a cada 2 segundos)">
+        <i class="fa-solid fa-microchip text-[10px]"></i>
+        <span>CPU: <strong id="top-cpu">0%</strong></span>
+      </div>
+      <span class="text-gray-700">|</span>
+      <div class="flex items-center gap-1 text-indigo-300" title="Memória RAM usada">
+        <i class="fa-solid fa-memory text-[10px]"></i>
+        <span>RAM: <strong id="top-ram">0MB</strong></span>
+      </div>
+      <span class="text-gray-700">|</span>
+      <div class="flex items-center gap-1 text-purple-300" title="Espaço em Disco">
+        <i class="fa-solid fa-hard-drive text-[10px]"></i>
+        <span>Disco: <strong id="top-disk">0GB</strong> (<span id="top-disk-pct">0%</span>)</span>
+      </div>
+    </div>
+    
+    <!-- Nav Tabs -->
+    <nav class="flex space-x-4 text-xs font-medium">
+      <button onclick="switchTab('query')" id="tab-query-btn" class="tab-btn active py-1 text-gray-300 hover:text-white transition flex items-center gap-1.5">
+        <i class="fa-solid fa-wand-magic-sparkles text-xs"></i> Consulta
+      </button>
+      <button onclick="switchTab('docs')" id="tab-docs-btn" class="tab-btn py-1 text-gray-400 hover:text-white transition flex items-center gap-1.5">
+        <i class="fa-solid fa-book-open text-xs"></i> Acervo (<span id="top-docs-count">0</span>)
+      </button>
+      <button onclick="switchTab('keys')" id="tab-keys-btn" class="tab-btn py-1 text-gray-400 hover:text-white transition flex items-center gap-1.5">
+        <i class="fa-solid fa-sliders text-xs"></i> Modelos & Chaves
+      </button>
+      <button onclick="switchTab('arch')" id="tab-arch-btn" class="tab-btn py-1 text-gray-400 hover:text-white transition flex items-center gap-1.5">
+        <i class="fa-solid fa-diagram-project text-xs text-brand-400"></i> Como Funciona
+      </button>
+    </nav>
+  </header>
+
+  <!-- Main Content -->
+  <main class="flex-1 max-w-7xl w-full mx-auto p-6">
+
+    <!-- TAB 1: CONSULTA & RELATÓRIOS -->
+    <section id="tab-query" class="space-y-6">
+      <div class="bg-dark-850 border border-gray-800 rounded-xl p-5 shadow-xl">
+        <label class="block text-sm font-medium text-gray-300 mb-2">
+          <i class="fa-solid fa-comment-dots text-brand-400"></i> Pergunta ou Texto a ser Respondido e Interpretado
+        </label>
+        <div class="flex flex-col md:flex-row gap-3">
+          <div class="relative flex-1">
+            <textarea id="query-input" rows="2" placeholder="Digite sua pergunta ou cole o texto a ser analisado com base no acervo canônico (ex: Como funciona a transferência de calor em trocadores de placas e quais os critérios de dimensionamento?)..." 
+                   class="w-full bg-dark-900 border border-gray-700 rounded-lg px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:border-brand-500 text-sm resize-y min-h-[48px]"></textarea>
+          </div>
+          <div class="flex flex-col sm:flex-row md:flex-col lg:flex-row items-stretch md:items-center gap-2">
+            <select id="query-active-slot" class="bg-dark-900 border border-gray-700 rounded-lg px-3 py-3 text-xs text-gray-200 focus:outline-none h-[48px]">
+              <option value="">Automático (Round-Robin entre Modelos Ativos)</option>
+              <!-- Preenchido dinamicamente -->
+            </select>
+            <button onclick="runQuery()" id="btn-run" class="bg-brand-600 hover:bg-brand-500 text-white font-medium px-6 py-3 rounded-lg flex items-center justify-center gap-2 transition text-sm shadow-lg shadow-brand-600/30 h-[48px] whitespace-nowrap">
+              <i class="fa-solid fa-paper-plane"></i> <span>Enviar para LLM</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Sugestões de Perguntas Rápidas (Exemplos Prontos) -->
+        <div class="mt-3 flex flex-wrap items-center gap-2 text-xs">
+          <span class="text-gray-500 text-[11px] font-medium"><i class="fa-regular fa-lightbulb text-amber-400"></i> Exemplos de consulta:</span>
+          <button type="button" onclick="setQueryExample('Quais os critérios normativos para verificação de flecha e cisalhamento em vigas de concreto armado?')" 
+                  class="px-2.5 py-1 rounded bg-dark-900 hover:bg-dark-800 text-gray-300 hover:text-white border border-gray-800 hover:border-brand-500/50 transition text-[11px]">
+            Engenharia / Estruturas
+          </button>
+          <button type="button" onclick="setQueryExample('Explique a diferença entre responsabilidade civil subjetiva e objetiva com base na teoria do risco.')" 
+                  class="px-2.5 py-1 rounded bg-dark-900 hover:bg-dark-800 text-gray-300 hover:text-white border border-gray-800 hover:border-brand-500/50 transition text-[11px]">
+            Direito / Teoria Geral
+          </button>
+          <button type="button" onclick="setQueryExample('Quais os protocolos de conduta clínica e diagnóstico diferencial na síndrome coronariana aguda?')" 
+                  class="px-2.5 py-1 rounded bg-dark-900 hover:bg-dark-800 text-gray-300 hover:text-white border border-gray-800 hover:border-brand-500/50 transition text-[11px]">
+            Medicina / Protocolos
+          </button>
+          <button type="button" onclick="setQueryExample('Como configurar proxy reverso com Uvicorn, Nginx e systemd garantindo alta disponibilidade?')" 
+                  class="px-2.5 py-1 rounded bg-dark-900 hover:bg-dark-800 text-gray-300 hover:text-white border border-gray-800 hover:border-brand-500/50 transition text-[11px]">
+            TI / Infraestrutura
+          </button>
+        </div>
+        <div class="mt-3 flex flex-wrap items-center gap-4 text-xs text-gray-400">
+          <label class="flex items-center gap-1.5 cursor-pointer">
+            <input type="checkbox" id="only-retrieve" class="rounded bg-dark-900 border-gray-700 text-brand-600 focus:ring-0">
+            <span class="text-amber-300 font-medium"><i class="fa-solid fa-bolt"></i> Extração Direta / Mini-LLM Local (0 Tokens LLM Externa)</span>
+          </label>
+          <span class="text-gray-600">•</span>
+          <label class="flex items-center gap-1.5 cursor-pointer">
+            <input type="checkbox" id="force-refresh" class="rounded bg-dark-900 border-gray-700 text-brand-600 focus:ring-0">
+            <span>Forçar nova geração (ignorar cache)</span>
+          </label>
+          <span class="text-gray-600">•</span>
+          <span id="cache-hit-pill" class="hidden px-2.5 py-0.5 rounded-full bg-emerald-950/80 text-emerald-300 border border-emerald-500/40 text-[11px] font-semibold animate-pulse">
+            <i class="fa-solid fa-circle-check"></i> 0 Tokens Consumidos (Cache Hit)
+          </span>
+          <span class="text-gray-600">•</span>
+          <span>Reranker Local: <strong class="text-brand-300 font-medium">FlashRank ONNX (MiniLM-L12)</strong></span>
+        </div>
+      </div>
+
+      <!-- Resposta & Trechos em Duas Colunas -->
+      <div id="results-area" class="grid grid-cols-1 lg:grid-cols-12 gap-6 hidden">
+        <!-- Relatório Redigido -->
+        <div class="lg:col-span-7 bg-dark-850 border border-gray-800 rounded-xl p-6 shadow-xl flex flex-col">
+          <div class="flex items-center justify-between border-b border-gray-800 pb-4 mb-3">
+            <div class="flex items-center gap-2">
+              <i class="fa-solid fa-file-lines text-brand-400"></i>
+              <h2 class="font-bold text-white text-base">Relatório Canônico Redigido</h2>
+            </div>
+            <div class="flex items-center gap-2">
+              <span id="llm-badge" class="text-xs px-2.5 py-1 rounded bg-gray-800 text-gray-300 border border-gray-700"></span>
+              <button onclick="copyReport()" class="text-xs bg-gray-800 hover:bg-gray-700 text-gray-300 px-3 py-1.5 rounded transition flex items-center gap-1">
+                <i class="fa-regular fa-copy"></i> Copiar
+              </button>
+            </div>
+          </div>
+          
+          <!-- Box exibindo a pergunta/texto direcionado à LLM -->
+          <div id="query-echo-box" class="mb-3 px-3.5 py-2.5 rounded-lg bg-dark-900 border border-brand-500/20 text-xs flex items-start gap-2 hidden">
+            <i class="fa-solid fa-quote-left text-brand-400 mt-0.5"></i>
+            <div class="flex-1">
+              <span class="text-gray-400 font-semibold block">Pergunta analisada pelo motor canônico:</span>
+              <span id="query-echo-text" class="text-gray-200 italic"></span>
+              <div id="facts-badge-container" class="mt-2 flex flex-wrap gap-1.5 hidden"></div>
+            </div>
+          </div>
+
+          <div id="report-content" class="text-gray-300 text-sm leading-relaxed whitespace-pre-line flex-1 overflow-y-auto max-h-[600px] pr-2">
+          </div>
+        </div>
+
+        <!-- Trechos Originais dos Livros (Grounding) -->
+        <div class="lg:col-span-5 bg-dark-850 border border-gray-800 rounded-xl p-6 shadow-xl flex flex-col">
+          <div class="border-b border-gray-800 pb-4 mb-4 flex items-center justify-between">
+            <div class="flex items-center gap-2">
+              <i class="fa-solid fa-book-bookmark text-amber-400"></i>
+              <h2 class="font-bold text-white text-base">Trechos Canônicos Utilizados</h2>
+            </div>
+            <span id="chunks-count" class="text-xs text-gray-400"></span>
+          </div>
+          <div id="chunks-list" class="space-y-3 overflow-y-auto max-h-[600px] pr-1">
+            <!-- Chunks renderizados dinamicamente -->
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB 2: DOCUMENTOS & PDFs -->
+    <section id="tab-docs" class="space-y-6 hidden">
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div class="bg-dark-850 border border-gray-800 rounded-xl p-5 shadow-lg">
+          <span class="text-xs text-gray-400 uppercase font-semibold">Documentos Indexados</span>
+          <div class="text-3xl font-extrabold text-white mt-2" id="stat-docs">-</div>
+          <p class="text-xs text-gray-500 mt-1">PDFs e arquivos lidos no servidor</p>
+        </div>
+        <div class="bg-dark-850 border border-gray-800 rounded-xl p-5 shadow-lg">
+          <span class="text-xs text-gray-400 uppercase font-semibold">Total de Chunks / Parágrafos</span>
+          <div class="text-3xl font-extrabold text-brand-400 mt-2" id="stat-chunks">-</div>
+          <p class="text-xs text-gray-500 mt-1">Segmentos indexados no banco FTS5</p>
+        </div>
+        <div class="bg-dark-850 border border-gray-800 rounded-xl p-5 shadow-lg">
+          <span class="text-xs text-gray-400 uppercase font-semibold">Mecanismo de Busca</span>
+          <div class="text-lg font-bold text-green-400 mt-2 flex items-center gap-2">
+            <i class="fa-solid fa-bolt"></i> SQLite FTS5 (BM25)
+          </div>
+          <p class="text-xs text-gray-500 mt-1">Busca instantânea em memória local</p>
+        </div>
+      </div>
+
+      <div class="bg-dark-850 border border-gray-800 rounded-xl p-6 shadow-xl space-y-4">
+        <h2 class="text-base font-bold text-white flex items-center gap-2">
+          <i class="fa-solid fa-folder-open text-brand-400"></i> Pasta de Documentos no Servidor Ubuntu
+        </h2>
+        <div class="flex flex-col md:flex-row gap-3">
+          <input type="text" id="doc-folder-input" placeholder="/dados/documentos" 
+                 class="flex-1 bg-dark-900 border border-gray-700 rounded-lg px-4 py-2.5 text-white text-sm focus:outline-none focus:border-brand-500">
+          <button onclick="saveAndIndex()" id="btn-index" class="bg-brand-600 hover:bg-brand-500 text-white px-6 py-2.5 rounded-lg text-sm font-medium flex items-center gap-2 transition">
+            <i class="fa-solid fa-arrows-rotate"></i> Escanear & Indexar Pasta
+          </button>
+        </div>
+        <p class="text-xs text-gray-400">O sistema lê todos os arquivos <code>.pdf</code>, <code>.txt</code> e <code>.md</code> dentro dessa pasta de forma incremental.</p>
+      </div>
+
+      <!-- Tabela do Acervo Completo de Documentos -->
+      <div class="bg-dark-850 border border-gray-800 rounded-xl p-6 shadow-xl space-y-4">
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-3 border-b border-gray-800 pb-4">
+          <div>
+            <h3 class="text-base font-bold text-white flex items-center gap-2">
+              <i class="fa-solid fa-book-bookmark text-brand-400"></i> Acervo Completo de Obras & Documentos Catalogados
+            </h3>
+            <p class="text-xs text-gray-400 mt-0.5">
+              Exibindo <strong id="docs-count-badge" class="text-brand-300 font-bold">0</strong> de <span id="docs-total-count">0</span> documentos indexados no sistema
+            </p>
+          </div>
+          
+          <!-- Filtros de Busca em Tempo Real -->
+          <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
+            <div class="relative">
+              <i class="fa-solid fa-magnifying-glass absolute left-3 top-2.5 text-gray-500 text-xs"></i>
+              <input type="text" id="doc-search-input" oninput="filterDocs()" 
+                     placeholder="Filtrar por nome, autor ou aula..." 
+                     class="w-full sm:w-64 bg-dark-900 border border-gray-700 rounded-lg pl-8 pr-3 py-2 text-xs text-white placeholder-gray-500 focus:outline-none focus:border-brand-500">
+            </div>
+            <select id="doc-type-filter" onchange="filterDocs()" 
+                    class="bg-dark-900 border border-gray-700 rounded-lg px-3 py-2 text-xs text-gray-300 focus:outline-none focus:border-brand-500">
+              <option value="all">Todas as Categorias</option>
+              <option value="natal_general">Natal / Psicológica / Tratados</option>
+              <option value="predictive">Aulas & Preditivas (Trânsitos)</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="overflow-x-auto max-h-[600px] overflow-y-auto rounded-lg border border-gray-800">
+          <table class="w-full text-left text-xs text-gray-400">
+            <thead class="bg-dark-900 text-gray-300 uppercase sticky top-0 z-10 border-b border-gray-800">
+              <tr>
+                <th class="py-3 px-3 text-center w-12">#</th>
+                <th class="py-3 px-4">Nome da Obra / Arquivo</th>
+                <th class="py-3 px-3">Escopo / Categoria</th>
+                <th class="py-3 px-3 text-center">Páginas</th>
+                <th class="py-3 px-3 text-right">Tamanho</th>
+                <th class="py-3 px-4 text-center">Ação</th>
+              </tr>
+            </thead>
+            <tbody id="docs-table-body" class="divide-y divide-gray-800/60 bg-dark-850/50">
+              <tr><td colspan="6" class="py-6 px-4 text-center text-gray-500">Carregando catálogo de documentos...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB 3: PROVEDORES, MODELOS ATIVOS & CHAVES -->
+    <section id="tab-keys" class="space-y-6 hidden">
+      
+      <!-- SEÇÃO DE MODELOS ATIVOS (3 SLOTS) -->
+      <div class="bg-dark-850 border border-brand-500/30 rounded-xl p-6 shadow-xl space-y-4">
+        <div class="flex items-center justify-between border-b border-gray-800 pb-3">
+          <div>
+            <h2 class="text-base font-bold text-white flex items-center gap-2">
+              <i class="fa-solid fa-microchip text-brand-400"></i> Modelos Ativos para Redação (Pool / Slots)
+            </h2>
+            <p class="text-xs text-gray-400">Ative até 3 modelos diferentes (mesmo provedor ou provedores distintos), com controle individual de <strong>Reasoning Effort</strong>.</p>
+          </div>
+          <button onclick="saveActiveModels()" class="bg-brand-600 hover:bg-brand-500 text-white px-4 py-2 rounded-lg text-xs font-semibold transition flex items-center gap-1.5 shadow">
+            <i class="fa-solid fa-floppy-disk"></i> Salvar Modelos Ativos
+          </button>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4" id="active-slots-container">
+          <!-- Renderizado dinamicamente com 3 slots -->
+        </div>
+      </div>
+
+      <!-- Configurações Globais -->
+      <div class="bg-dark-850 border border-gray-800 rounded-xl p-6 shadow-xl space-y-4">
+        <h2 class="text-base font-bold text-white flex items-center gap-2">
+          <i class="fa-solid fa-gear text-brand-400"></i> Orquestração Global do Gateway
+        </h2>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
+          <div class="flex items-center justify-between bg-dark-900 p-3 rounded-lg border border-gray-800">
+            <div>
+              <span class="font-medium text-gray-200 block">Round-Robin entre Modelos</span>
+              <span class="text-xs text-gray-500">Alterna as requisições entre os modelos ativos</span>
+            </div>
+            <input type="checkbox" id="cfg-round-robin" class="toggle-cb rounded bg-dark-800 text-brand-600 w-5 h-5" onchange="saveGlobalSettings()">
+          </div>
+          <div class="flex items-center justify-between bg-dark-900 p-3 rounded-lg border border-gray-800">
+            <div>
+              <span class="font-medium text-gray-200 block">Fallback Automático</span>
+              <span class="text-xs text-gray-500">Muda de modelo se houver erro ou cota excedida</span>
+            </div>
+            <input type="checkbox" id="cfg-fallback" class="toggle-cb rounded bg-dark-800 text-brand-600 w-5 h-5" onchange="saveGlobalSettings()">
+          </div>
+          <div class="bg-dark-900 p-3 rounded-lg border border-gray-800">
+            <span class="font-medium text-gray-200 block mb-1">Idioma da Redação</span>
+            <select id="cfg-language" class="w-full bg-dark-850 border border-gray-700 rounded px-2 py-1 text-xs text-gray-300" onchange="saveGlobalSettings()">
+              <option value="pt-BR">Português do Brasil (pt-BR)</option>
+              <option value="en-US">English (en-US)</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <!-- Cards de Provedores e Chaves -->
+      <div class="space-y-4">
+        <h3 class="text-sm font-bold text-gray-300 flex items-center gap-2">
+          <i class="fa-solid fa-key text-amber-400"></i> Provedores de API & Chaves Cadastradas
+        </h3>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6" id="providers-container">
+          <!-- Renderizado dinamicamente -->
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB 4: COMO FUNCIONA (ARQUITETURA & GRÁFICOS) -->
+    <section id="tab-arch" class="space-y-6 hidden">
+      <!-- Banner Principal -->
+      <div class="bg-gradient-to-r from-brand-900/60 via-dark-850 to-dark-850 border border-brand-500/30 rounded-xl p-6 shadow-xl">
+        <div class="flex items-center gap-3 mb-2">
+          <span class="w-10 h-10 rounded-lg bg-brand-600 flex items-center justify-center text-white text-lg">
+            <i class="fa-solid fa-network-wired"></i>
+          </span>
+          <div>
+            <h2 class="text-lg font-bold text-white">Pipeline de Recuperação em Duas Etapas & Custo Zero</h2>
+            <p class="text-xs text-gray-300">Como o CanonicalRAG combina SQLite FTS5, Mini-LLM FlashRank e Gateway de LLMs para atingir máxima fidelidade com consumo mínimo de tokens.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Diagrama de Blocos Visual (Gráfico SVG/CSS) -->
+      <div class="bg-dark-850 border border-gray-800 rounded-xl p-6 shadow-xl space-y-6">
+        <h3 class="text-sm font-bold text-gray-200 flex items-center gap-2">
+          <i class="fa-solid fa-diagram-project text-brand-400"></i> Fluxo de Processamento de Cada Consulta
+        </h3>
+
+        <div class="grid grid-cols-1 md:grid-cols-5 gap-3 relative text-xs">
+          <!-- Etapa 1 -->
+          <div class="bg-dark-900 border border-gray-700/80 rounded-xl p-4 flex flex-col justify-between space-y-2 relative">
+            <div class="flex items-center justify-between">
+              <span class="w-6 h-6 rounded-full bg-blue-600/30 text-blue-400 flex items-center justify-center font-bold text-[11px] border border-blue-500/30">1</span>
+              <span class="text-[10px] text-gray-500 font-mono">&lt; 10ms</span>
+            </div>
+            <div>
+              <h4 class="font-bold text-white text-sm">Cache Semântico</h4>
+              <p class="text-[11px] text-gray-400 mt-1">Normaliza a consulta e verifica hash SHA-256 no SQLite local.</p>
+            </div>
+            <div class="pt-2 border-t border-gray-800 text-[10px] text-emerald-400 font-medium">
+              <i class="fa-solid fa-circle-check"></i> Hit: Retorno imediato a 0 tokens
+            </div>
+          </div>
+
+          <!-- Etapa 2 -->
+          <div class="bg-dark-900 border border-gray-700/80 rounded-xl p-4 flex flex-col justify-between space-y-2 relative">
+            <div class="flex items-center justify-between">
+              <span class="w-6 h-6 rounded-full bg-indigo-600/30 text-indigo-400 flex items-center justify-center font-bold text-[11px] border border-indigo-500/30">2</span>
+              <span class="text-[10px] text-gray-500 font-mono">&lt; 15ms</span>
+            </div>
+            <div>
+              <h4 class="font-bold text-white text-sm">Busca Ampla FTS5</h4>
+              <p class="text-[11px] text-gray-400 mt-1">Varre 59.000+ chunks via índice BM25 multicamada + proximidade (NEAR).</p>
+            </div>
+            <div class="pt-2 border-t border-gray-800 text-[10px] text-sky-400 font-medium">
+              <i class="fa-solid fa-filter"></i> Coleta Top 20 Candidatos
+            </div>
+          </div>
+
+          <!-- Etapa 3 -->
+          <div class="bg-dark-900 border border-brand-500/50 rounded-xl p-4 flex flex-col justify-between space-y-2 relative shadow-lg shadow-brand-500/10">
+            <div class="flex items-center justify-between">
+              <span class="w-6 h-6 rounded-full bg-brand-600 text-white flex items-center justify-center font-bold text-[11px]">3</span>
+              <span class="text-[10px] text-brand-300 font-mono">~0.8s (CPU)</span>
+            </div>
+            <div>
+              <h4 class="font-bold text-brand-300 text-sm">Mini-LLM Local</h4>
+              <p class="text-[11px] text-gray-400 mt-1">Cross-Encoder <strong>FlashRank MiniLM</strong> rodando em ONNX. Rerank semântico na CPU.</p>
+            </div>
+            <div class="pt-2 border-t border-gray-800 text-[10px] text-amber-400 font-medium">
+              <i class="fa-solid fa-award"></i> Seleciona os Top 5 Perfeitos
+            </div>
+          </div>
+
+          <!-- Etapa 4 -->
+          <div class="bg-dark-900 border border-gray-700/80 rounded-xl p-4 flex flex-col justify-between space-y-2 relative">
+            <div class="flex items-center justify-between">
+              <span class="w-6 h-6 rounded-full bg-purple-600/30 text-purple-400 flex items-center justify-center font-bold text-[11px] border border-purple-500/30">4</span>
+              <span class="text-[10px] text-emerald-400 font-mono">-70% Tokens</span>
+            </div>
+            <div>
+              <h4 class="font-bold text-white text-sm">Poda de Sentenças</h4>
+              <p class="text-[11px] text-gray-400 mt-1">Poda pontes vazias e isola as orações de alta densidade conceitual.</p>
+            </div>
+            <div class="pt-2 border-t border-gray-800 text-[10px] text-purple-400 font-medium">
+              <i class="fa-solid fa-scissors"></i> Monta Dossiê Canônico
+            </div>
+          </div>
+
+          <!-- Etapa 5 -->
+          <div class="bg-dark-900 border border-gray-700/80 rounded-xl p-4 flex flex-col justify-between space-y-2 relative">
+            <div class="flex items-center justify-between">
+              <span class="w-6 h-6 rounded-full bg-pink-600/30 text-pink-400 flex items-center justify-center font-bold text-[11px] border border-pink-500/30">5</span>
+              <span class="text-[10px] text-gray-500 font-mono">Streaming</span>
+            </div>
+            <div>
+              <h4 class="font-bold text-white text-sm">Síntese / Gateway</h4>
+              <p class="text-[11px] text-gray-400 mt-1">LLM externa (Claude / Gemini) recebe contexto leve (~350 tok) e gera redação.</p>
+            </div>
+            <div class="pt-2 border-t border-gray-800 text-[10px] text-pink-400 font-medium">
+              <i class="fa-solid fa-feather-pointed"></i> Redação Nota 9.5
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Comparativo e Vantagens Técnicas -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div class="bg-dark-850 border border-gray-800 rounded-xl p-6 shadow-xl space-y-3">
+          <h3 class="text-sm font-bold text-white flex items-center gap-2">
+            <i class="fa-solid fa-scale-balanced text-emerald-400"></i> Por que Two-Stage Retrieval?
+          </h3>
+          <p class="text-xs text-gray-400 leading-relaxed">
+            RAGs tradicionais baseados apenas em vetores densos (Embeddings) sofrem para diferenciar termos técnicos precisos (ex: artigos de lei, códigos de erro, números de normas ou aspectos planetários exatos). O CanonicalRAG une a velocidade e precisão léxica do <strong>SQLite FTS5</strong> à capacidade de compreensão profunda do <strong>Mini-LLM Cross-Encoder</strong> local, garantindo zero alucinações.
+          </p>
+          <div class="space-y-1.5 pt-2 text-xs text-gray-300">
+            <div class="flex items-center gap-2"><i class="fa-solid fa-check text-emerald-400"></i> <span>Consumo de RAM em repouso: <strong>~35 MB</strong></span></div>
+            <div class="flex items-center gap-2"><i class="fa-solid fa-check text-emerald-400"></i> <span>Dispensa GPU dedicada para reranking</span></div>
+            <div class="flex items-center gap-2"><i class="fa-solid fa-check text-emerald-400"></i> <span>Totalmente compatível com qualquer assunto documental</span></div>
+          </div>
+        </div>
+
+        <div class="bg-dark-850 border border-gray-800 rounded-xl p-6 shadow-xl space-y-3">
+          <h3 class="text-sm font-bold text-white flex items-center gap-2">
+            <i class="fa-solid fa-piggy-bank text-amber-400"></i> Estratégia de Consumo Mínimo de Tokens
+          </h3>
+          <p class="text-xs text-gray-400 leading-relaxed">
+            Em vez de transferir blocos gigantescos de PDFs para as APIs pagas das LLMs, a pipeline local filtra, decompõe e poda os textos antecipadamente:
+          </p>
+          <div class="space-y-1.5 pt-2 text-xs text-gray-300">
+            <div class="flex items-center gap-2"><i class="fa-solid fa-bolt text-amber-400"></i> <span><strong>Cache Semântico Local:</strong> 0 tokens em consultas equivalentes</span></div>
+            <div class="flex items-center gap-2"><i class="fa-solid fa-scissors text-amber-400"></i> <span><strong>Poda Extrativa:</strong> Economia de 70% nos tokens de entrada</span></div>
+            <div class="flex items-center gap-2"><i class="fa-solid fa-server text-amber-400"></i> <span><strong>Modo Direto Local:</strong> Resposta completa a 0 tokens externos</span></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Modal Adicionar Chave -->
+  <div id="add-key-modal" class="fixed inset-0 bg-black/70 flex items-center justify-center p-4 z-50 hidden">
+    <div class="bg-dark-850 border border-gray-800 rounded-xl p-6 max-w-md w-full shadow-2xl space-y-4">
+      <h3 class="text-lg font-bold text-white flex items-center gap-2">
+        <i class="fa-solid fa-key text-brand-400"></i> Adicionar Chave de API
+      </h3>
+      <p class="text-xs text-gray-400" id="modal-provider-name">Provedor: -</p>
+      <input type="hidden" id="modal-provider-id">
+      <div>
+        <label class="block text-xs text-gray-300 mb-1">Rótulo / Identificador (Opcional)</label>
+        <input type="text" id="modal-key-label" placeholder="Ex: Conta Gemini 1 ou Claude Pessoal" 
+               class="w-full bg-dark-900 border border-gray-700 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-brand-500">
+      </div>
+      <div>
+        <label class="block text-xs text-gray-300 mb-1">Chave de API (Secret Key)</label>
+        <input type="password" id="modal-key-val" placeholder="Cole a chave aqui..." 
+               class="w-full bg-dark-900 border border-gray-700 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-brand-500">
+      </div>
+      <div class="flex justify-end gap-3 pt-2">
+        <button onclick="closeModal()" class="px-4 py-2 text-xs text-gray-400 hover:text-white transition">Cancelar</button>
+        <button onclick="submitKey()" class="bg-brand-600 hover:bg-brand-500 text-white px-5 py-2 rounded-lg text-xs font-semibold transition">Salvar Chave</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let appConfig = null;
+
+    // Alternar Abas
+    function switchTab(tab) {
+      ['query', 'docs', 'keys', 'arch'].forEach(t => {
+        const el = document.getElementById(`tab-${t}`);
+        const btn = document.getElementById(`tab-${t}-btn`);
+        if (el) el.classList.add('hidden');
+        if (btn) btn.classList.remove('active');
+      });
+      const activeEl = document.getElementById(`tab-${tab}`);
+      const activeBtn = document.getElementById(`tab-${tab}-btn`);
+      if (activeEl) activeEl.classList.remove('hidden');
+      if (activeBtn) activeBtn.classList.add('active');
+
+      if (tab === 'docs') loadStats();
+      if (tab === 'keys') loadConfig();
+    }
+
+    // Carregar Configurações
+    async function loadConfig() {
+      try {
+        const res = await fetch('/api/config');
+        appConfig = await res.json();
+        
+        // Atualiza campos gerais
+        document.getElementById('doc-folder-input').value = appConfig.settings.documents_folder;
+        document.getElementById('cfg-round-robin').checked = appConfig.settings.round_robin_enabled;
+        document.getElementById('cfg-fallback').checked = appConfig.settings.fallback_enabled;
+        document.getElementById('cfg-language').value = appConfig.settings.language;
+
+        renderActiveSlots();
+        renderProviders();
+        populateQuerySlotsDropdown();
+      } catch (err) {
+        console.error("Erro ao carregar config:", err);
+      }
+    }
+
+    // Renderizar os 3 Slots de Modelos Ativos
+    function renderActiveSlots() {
+      const container = document.getElementById('active-slots-container');
+      container.innerHTML = '';
+
+      const slots = appConfig.active_models || [];
+      slots.forEach((slot, index) => {
+        const provider = appConfig.providers[slot.provider] || { available_models: [], keys: [] };
+        
+        const modelsOptions = (provider.available_models || []).map(m => 
+          `<option value="${m}" ${m === slot.model_id ? 'selected' : ''}>${m}</option>`
+        ).join('');
+
+        const keysOptions = `<option value="">Todas as chaves (Round-Robin)</option>` + 
+          (provider.keys || []).map(k => 
+            `<option value="${k.id}" ${k.id === slot.api_key_id ? 'selected' : ''}>${k.label || k.masked_key}</option>`
+          ).join('');
+
+        const card = document.createElement('div');
+        card.className = `p-4 rounded-xl border ${slot.active ? 'bg-dark-900 border-brand-500/50' : 'bg-dark-850/60 border-gray-800 opacity-60'} space-y-3 shadow-md`;
+        card.id = `slot-card-${slot.id}`;
+
+        card.innerHTML = `
+          <div class="flex items-center justify-between border-b border-gray-800 pb-2">
+            <span class="text-xs font-bold text-white flex items-center gap-1.5">
+              <span class="w-2 h-2 rounded-full ${slot.active ? 'bg-green-400' : 'bg-gray-600'}"></span>
+              Slot ${index + 1}: ${slot.label}
+            </span>
+            <label class="flex items-center gap-1 text-[11px] cursor-pointer">
+              <input type="checkbox" id="${slot.id}-active" ${slot.active ? 'checked' : ''} onchange="toggleSlotActiveUI('${slot.id}')" class="rounded bg-dark-800 text-brand-600">
+              <span class="text-gray-300">Ativado</span>
+            </label>
+          </div>
+
+          <div class="space-y-1">
+            <label class="block text-[11px] text-gray-400">Provedor</label>
+            <select id="${slot.id}-provider" onchange="onSlotProviderChange('${slot.id}')" class="w-full bg-dark-850 border border-gray-700 rounded-lg px-2.5 py-1.5 text-xs text-gray-200">
+              <option value="gemini" ${slot.provider === 'gemini' ? 'selected' : ''}>Google Gemini</option>
+              <option value="openrouter" ${slot.provider === 'openrouter' ? 'selected' : ''}>OpenRouter (Vários/Gratuitos)</option>
+              <option value="cloudflare" ${slot.provider === 'cloudflare' ? 'selected' : ''}>Cloudflare Workers AI</option>
+              <option value="claude" ${slot.provider === 'claude' ? 'selected' : ''}>Anthropic Claude</option>
+              <option value="groq" ${slot.provider === 'groq' ? 'selected' : ''}>Groq (Llama / DeepSeek)</option>
+              <option value="openai" ${slot.provider === 'openai' ? 'selected' : ''}>OpenAI / Custom</option>
+            </select>
+          </div>
+
+          <div class="space-y-1">
+            <div class="flex items-center justify-between">
+              <label class="block text-[11px] text-gray-400">Modelo Selecionado</label>
+              <button onclick="fetchModelsForProvider(document.getElementById('${slot.id}-provider').value)" class="text-[10px] text-brand-400 hover:text-brand-300">
+                <i class="fa-solid fa-arrows-rotate"></i> Atualizar
+              </button>
+            </div>
+            <select id="${slot.id}-model" class="w-full bg-dark-850 border border-gray-700 rounded-lg px-2.5 py-1.5 text-xs text-gray-200">
+              ${modelsOptions || `<option value="${slot.model_id}">${slot.model_id}</option>`}
+            </select>
+          </div>
+
+          <div class="grid grid-cols-2 gap-2">
+            <div class="space-y-1">
+              <label class="block text-[11px] text-gray-400">Reasoning Effort</label>
+              <select id="${slot.id}-effort" class="w-full bg-dark-850 border border-gray-700 rounded-lg px-2 py-1.5 text-xs text-gray-200">
+                <option value="none" ${slot.reasoning_effort === 'none' ? 'selected' : ''}>Nenhum (Rápido)</option>
+                <option value="low" ${slot.reasoning_effort === 'low' ? 'selected' : ''}>Low (Baixo)</option>
+                <option value="medium" ${slot.reasoning_effort === 'medium' ? 'selected' : ''}>Medium (Médio)</option>
+                <option value="high" ${slot.reasoning_effort === 'high' ? 'selected' : ''}>High (Alto)</option>
+              </select>
+            </div>
+            <div class="space-y-1">
+              <label class="block text-[11px] text-gray-400">Chave API</label>
+              <select id="${slot.id}-key" class="w-full bg-dark-850 border border-gray-700 rounded-lg px-2 py-1.5 text-xs text-gray-200">
+                ${keysOptions}
+              </select>
+            </div>
+          </div>
+          
+          <div class="text-[10px] text-gray-500 flex justify-between pt-1">
+            <span>Usos: ${slot.usage_count || 0}</span>
+            <span>Erros: ${slot.errors_count || 0}</span>
+          </div>
+        `;
+        container.appendChild(card);
+      });
+    }
+
+    function toggleSlotActiveUI(slotId) {
+      const isChecked = document.getElementById(`${slotId}-active`).checked;
+      const card = document.getElementById(`slot-card-${slotId}`);
+      if (isChecked) {
+        card.classList.remove('opacity-60');
+        card.classList.add('border-brand-500/50');
+      } else {
+        card.classList.add('opacity-60');
+        card.classList.remove('border-brand-500/50');
+      }
+    }
+
+    function onSlotProviderChange(slotId) {
+      const newProvider = document.getElementById(`${slotId}-provider`).value;
+      const providerData = appConfig.providers[newProvider] || { available_models: [], keys: [] };
+      
+      const modelSelect = document.getElementById(`${slotId}-model`);
+      modelSelect.innerHTML = (providerData.available_models || []).map(m => 
+        `<option value="${m}">${m}</option>`
+      ).join('');
+
+      const keySelect = document.getElementById(`${slotId}-key`);
+      keySelect.innerHTML = `<option value="">Todas as chaves (Round-Robin)</option>` + 
+        (providerData.keys || []).map(k => 
+          `<option value="${k.id}">${k.label || k.masked_key}</option>`
+        ).join('');
+    }
+
+    async function saveActiveModels() {
+      const slotsPayload = [];
+      const slots = appConfig.active_models || [];
+
+      for (const s of slots) {
+        const active = document.getElementById(`${s.id}-active`).checked;
+        const provider = document.getElementById(`${s.id}-provider`).value;
+        const model_id = document.getElementById(`${s.id}-model`).value;
+        const reasoning_effort = document.getElementById(`${s.id}-effort`).value;
+        const api_key_id = document.getElementById(`${s.id}-key`).value;
+
+        slotsPayload.push({
+          id: s.id,
+          label: s.label,
+          provider: provider,
+          model_id: model_id,
+          api_key_id: api_key_id || null,
+          reasoning_effort: reasoning_effort,
+          temperature: s.temperature || 0.1,
+          active: active
+        });
+      }
+
+      try {
+        const res = await fetch('/api/active-models', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(slotsPayload)
+        });
+        if (res.status === 200) {
+          alert("Configuração dos Modelos Ativos salva com sucesso!");
+          loadConfig();
+        } else {
+          alert("Erro ao salvar modelos ativos.");
+        }
+      } catch (err) {
+        alert("Erro na conexão: " + err);
+      }
+    }
+
+    function populateQuerySlotsDropdown() {
+      const select = document.getElementById('query-active-slot');
+      select.innerHTML = '<option value="">Automático (Round-Robin entre Modelos Ativos)</option>';
+
+      (appConfig.active_models || []).forEach((s, idx) => {
+        if (s.active) {
+          select.innerHTML += `<option value="${s.id}">Slot ${idx + 1}: ${s.model_id} (${s.provider.toUpperCase()} | effort: ${s.reasoning_effort})</option>`;
+        }
+      });
+    }
+
+    // Renderizar Provedores e Lista de Chaves
+    function renderProviders() {
+      const container = document.getElementById('providers-container');
+      container.innerHTML = '';
+
+      for (const [pId, p] of Object.entries(appConfig.providers)) {
+        const card = document.createElement('div');
+        card.className = "bg-dark-850 border border-gray-800 rounded-xl p-5 shadow-xl space-y-4";
+        
+        let keysHtml = '';
+        if (p.keys && p.keys.length > 0) {
+          keysHtml = p.keys.map(k => `
+            <div class="flex items-center justify-between bg-dark-900 p-2.5 rounded-lg border border-gray-800 text-xs">
+              <div class="flex items-center gap-2">
+                <span class="w-2 h-2 rounded-full ${k.active ? 'bg-green-400' : 'bg-gray-600'}"></span>
+                <span class="text-gray-200 font-medium">${k.label || 'Sem rótulo'}</span>
+                <span class="text-gray-500 font-mono">(${k.masked_key || '***'})</span>
+              </div>
+              <div class="flex items-center gap-2">
+                <button onclick="fetchModelsWithKey('${pId}', '${k.id}')" title="Buscar modelos existentes com esta chave" class="text-xs bg-dark-800 hover:bg-dark-700 text-brand-400 px-2 py-0.5 rounded border border-brand-500/30">
+                  <i class="fa-solid fa-cloud-arrow-down"></i> Buscar Modelos
+                </button>
+                <button onclick="toggleKey('${pId}', '${k.id}')" class="text-xs px-2 py-0.5 rounded ${k.active ? 'bg-amber-900/40 text-amber-300' : 'bg-gray-800 text-gray-400'}">
+                  ${k.active ? 'Pausar' : 'Ativar'}
+                </button>
+                <button onclick="deleteKey('${pId}', '${k.id}')" class="text-xs text-red-400 hover:text-red-300 px-1">
+                  <i class="fa-solid fa-trash"></i>
+                </button>
+              </div>
+            </div>
+          `).join('');
+        } else {
+          keysHtml = '<p class="text-xs text-gray-500 italic">Nenhuma chave cadastrada neste provedor.</p>';
+        }
+
+        const extraConfigHtml = pId === 'cloudflare' ? `
+          <div class="bg-dark-900/80 p-2.5 rounded-lg border border-gray-800 space-y-1.5 text-xs">
+            <div class="flex items-center justify-between">
+              <label class="block text-gray-400 text-[11px]">Cloudflare Account ID (Obrigatório)</label>
+              <button onclick="saveCloudflareConfig()" class="text-[10px] text-brand-400 hover:text-brand-300">
+                <i class="fa-solid fa-check"></i> Salvar ID
+              </button>
+            </div>
+            <input type="text" id="cf-account-id" value="${p.account_id || ''}" placeholder="Ex: b65c19e59f47053e18fbf7c7..." 
+                   class="w-full bg-dark-850 border border-gray-700 rounded px-2.5 py-1 text-white text-xs focus:outline-none focus:border-brand-500 font-mono">
+          </div>
+        ` : '';
+
+        card.innerHTML = `
+          <div class="flex items-center justify-between border-b border-gray-800 pb-3">
+            <div class="flex items-center gap-2">
+              <span class="font-bold text-white text-base">${p.label}</span>
+              <span class="text-[11px] px-2 py-0.5 rounded ${p.active ? 'bg-green-900/40 text-green-300 border border-green-500/20' : 'bg-gray-800 text-gray-400'}">
+                ${p.active ? 'Ativo' : 'Desativado'}
+              </span>
+            </div>
+            <button onclick="toggleProvider('${pId}')" class="text-xs text-gray-400 hover:text-white">
+              <i class="fa-solid fa-power-off"></i> Alternar
+            </button>
+          </div>
+
+          ${extraConfigHtml}
+
+          <div class="flex items-center justify-between text-xs text-gray-400 bg-dark-900/60 p-2.5 rounded-lg border border-gray-800">
+            <span>Modelos Conhecidos: <strong>${p.available_models ? p.available_models.length : 0}</strong></span>
+            <button onclick="fetchModelsForProvider('${pId}')" class="text-xs text-brand-400 hover:text-brand-300 font-medium flex items-center gap-1">
+              <i class="fa-solid fa-arrows-rotate"></i> Atualizar Modelos da API
+            </button>
+          </div>
+
+          <div class="space-y-2">
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-semibold text-gray-300">Chaves de API Cadastradas (${p.keys ? p.keys.length : 0})</span>
+              <button onclick="openAddKeyModal('${pId}', '${p.label}')" class="text-xs text-brand-400 hover:text-brand-300 flex items-center gap-1">
+                <i class="fa-solid fa-plus"></i> Adicionar Chave
+              </button>
+            </div>
+            <div class="space-y-1.5">
+              ${keysHtml}
+            </div>
+          </div>
+        `;
+        container.appendChild(card);
+      }
+    }
+
+    // Buscar modelos com chave
+    async function fetchModelsWithKey(provider, keyId) {
+      const btn = event.currentTarget;
+      const originalHtml = btn.innerHTML;
+      btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Buscando...';
+      btn.disabled = true;
+
+      try {
+        const res = await fetch(`/api/providers/${provider}/fetch-models`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ key_id: keyId })
+        });
+        const data = await res.json();
+        if (res.status === 200) {
+          alert(`Modelos obtidos com sucesso do ${provider.toUpperCase()}:\n\n` + data.models.slice(0, 8).join('\n') + (data.models.length > 8 ? `\n...e mais ${data.models.length - 8} modelos.` : ''));
+          loadConfig();
+        } else {
+          alert(`Erro: ${data.detail}`);
+        }
+      } catch (err) {
+        alert("Erro na requisição: " + err);
+      } finally {
+        btn.innerHTML = originalHtml;
+        btn.disabled = false;
+      }
+    }
+
+    async function fetchModelsForProvider(provider) {
+      try {
+        const res = await fetch(`/api/providers/${provider}/fetch-models`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({})
+        });
+        const data = await res.json();
+        if (res.status === 200) {
+          alert(`Lista de modelos atualizada para ${provider.toUpperCase()}:\n` + data.models.slice(0, 10).join(', '));
+          loadConfig();
+        } else {
+          alert(data.detail || "Erro ao consultar modelos.");
+        }
+      } catch (err) {
+        alert("Erro: " + err);
+      }
+    }
+
+    async function saveCloudflareConfig() {
+      const accountId = document.getElementById('cf-account-id').value.trim();
+      await fetch('/api/providers/cloudflare/config', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ account_id: accountId })
+      });
+      alert("Account ID da Cloudflare salvo com sucesso!");
+      loadConfig();
+    }
+
+    async function toggleProvider(provider) {
+      await fetch(`/api/providers/${provider}/toggle`, { method: 'POST' });
+      loadConfig();
+    }
+
+    function openAddKeyModal(pId, pLabel) {
+      document.getElementById('modal-provider-id').value = pId;
+      document.getElementById('modal-provider-name').textContent = `Provedor: ${pLabel}`;
+      document.getElementById('modal-key-label').value = '';
+      document.getElementById('modal-key-val').value = '';
+      document.getElementById('add-key-modal').classList.remove('hidden');
+    }
+
+    function closeModal() {
+      document.getElementById('add-key-modal').classList.add('hidden');
+    }
+
+    async function submitKey() {
+      const pId = document.getElementById('modal-provider-id').value;
+      const label = document.getElementById('modal-key-label').value;
+      const key = document.getElementById('modal-key-val').value;
+
+      if (!key.trim()) return alert("Digite a chave de API.");
+
+      await fetch(`/api/providers/${pId}/keys`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ key, label })
+      });
+
+      closeModal();
+      loadConfig();
+    }
+
+    async function toggleKey(pId, keyId) {
+      await fetch(`/api/providers/${pId}/keys/${keyId}/toggle`, { method: 'POST' });
+      loadConfig();
+    }
+
+    async function deleteKey(pId, keyId) {
+      if (!confirm("Remover esta chave de API?")) return;
+      await fetch(`/api/providers/${pId}/keys/${keyId}`, { method: 'DELETE' });
+      loadConfig();
+    }
+
+    async function saveGlobalSettings() {
+      const payload = {
+        documents_folder: document.getElementById('doc-folder-input').value,
+        default_provider: appConfig.settings.default_provider,
+        round_robin_enabled: document.getElementById('cfg-round-robin').checked,
+        fallback_enabled: document.getElementById('cfg-fallback').checked,
+        temperature: appConfig.settings.temperature,
+        max_tokens: appConfig.settings.max_tokens,
+        language: document.getElementById('cfg-language').value
+      };
+      await fetch('/api/settings', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+      loadConfig();
+    }
+
+    // Indexação & Estatísticas
+    let allDocumentsList = [];
+
+    function formatBytes(bytes) {
+      if (!bytes || bytes <= 0) return '-';
+      if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
+      return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
+    }
+
+    function queryBook(filename) {
+      // Limpa extensões e prefixos para pesquisa amigável
+      let clean = filename.replace(/\.(pdf|txt|md)$/i, '').replace(/^\d+[\s\-_]*/, '');
+      document.getElementById('query-input').value = `Análise baseada na obra: ${clean}`;
+      switchTab('query');
+      document.getElementById('query-input').focus();
+    }
+
+    function renderDocsTable(docs) {
+      const tbody = document.getElementById('docs-table-body');
+      document.getElementById('docs-count-badge').textContent = docs.length;
+
+      if (!docs || docs.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="6" class="py-8 px-4 text-center text-gray-500">Nenhum documento encontrado com os filtros atuais.</td></tr>`;
+        return;
+      }
+
+      tbody.innerHTML = docs.map((d, idx) => {
+        const isPdf = d.filename.toLowerCase().endsWith('.pdf');
+        const icon = isPdf ? 'fa-regular fa-file-pdf text-rose-400' : 'fa-regular fa-file-lines text-sky-400';
+        const typeBadge = d.doc_type === 'predictive'
+          ? '<span class="px-2 py-0.5 rounded bg-amber-950/60 text-amber-300 border border-amber-700/40 text-[10px] font-medium">Aulas & Preditivas</span>'
+          : '<span class="px-2 py-0.5 rounded bg-purple-950/60 text-purple-300 border border-purple-700/40 text-[10px] font-medium">Natal / Geral</span>';
+
+        return `
+          <tr class="hover:bg-dark-900/60 transition">
+            <td class="py-2.5 px-3 text-center text-gray-500 font-mono text-[11px]">${idx + 1}</td>
+            <td class="py-2.5 px-4 font-medium text-gray-200">
+              <div class="flex items-center gap-2 max-w-lg truncate" title="${d.filename}">
+                <i class="${icon}"></i>
+                <span class="truncate">${d.filename}</span>
+              </div>
+            </td>
+            <td class="py-2.5 px-3 whitespace-nowrap">${typeBadge}</td>
+            <td class="py-2.5 px-3 text-center font-mono text-gray-300">${d.pages_count || 1}</td>
+            <td class="py-2.5 px-3 text-right font-mono text-gray-400 whitespace-nowrap">${formatBytes(d.filesize)}</td>
+            <td class="py-2.5 px-4 text-center whitespace-nowrap">
+              <button onclick="queryBook('${d.filename.replace(/'/g, "\\'")}')" 
+                      class="px-2.5 py-1 rounded bg-dark-800 hover:bg-brand-600 text-gray-300 hover:text-white transition text-[11px] border border-gray-700 hover:border-brand-500">
+                <i class="fa-solid fa-magnifying-glass"></i> Consultar
+              </button>
+            </td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    function filterDocs() {
+      const search = (document.getElementById('doc-search-input').value || '').toLowerCase().trim();
+      const typeFilter = document.getElementById('doc-type-filter').value;
+
+      let filtered = allDocumentsList;
+      if (typeFilter && typeFilter !== 'all') {
+        filtered = filtered.filter(d => d.doc_type === typeFilter);
+      }
+      if (search) {
+        filtered = filtered.filter(d => d.filename.toLowerCase().includes(search));
+      }
+      renderDocsTable(filtered);
+    }
+
+    async function loadStats() {
+      try {
+        const res = await fetch('/api/stats');
+        const data = await res.json();
+        document.getElementById('stat-docs').textContent = data.total_documents;
+        document.getElementById('stat-chunks').textContent = data.total_chunks;
+        document.getElementById('docs-total-count').textContent = data.total_documents;
+
+        allDocumentsList = data.documents || data.recent_documents || [];
+        filterDocs();
+      } catch (err) {
+        console.error("Erro ao carregar estatísticas:", err);
+      }
+    }
+
+    async function saveAndIndex() {
+      const folder = document.getElementById('doc-folder-input').value;
+      await saveGlobalSettings();
+      const btn = document.getElementById('btn-index');
+      btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Indexando...';
+      btn.disabled = true;
+
+      try {
+        const res = await fetch('/api/index', { method: 'POST' });
+        const data = await res.json();
+        alert(data.message);
+        setTimeout(loadStats, 3000);
+      } catch (err) {
+        alert("Erro ao disparar indexação: " + err);
+      } finally {
+        btn.innerHTML = '<i class="fa-solid fa-arrows-rotate"></i> Escanear & Indexar Pasta';
+        btn.disabled = false;
+      }
+    }
+
+    // Executar Consulta RAG
+    async function runQuery() {
+      const query = document.getElementById('query-input').value.trim();
+      if (!query) return alert("Digite o tema ou posicionamento para a consulta.");
+
+      const btn = document.getElementById('btn-run');
+      btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> <span>Pesquisando...</span>';
+      btn.disabled = true;
+
+      const payload = {
+        query: query,
+        only_retrieve: document.getElementById('only-retrieve').checked,
+        force_refresh: document.getElementById('force-refresh') ? document.getElementById('force-refresh').checked : false,
+        preferred_slot_id: document.getElementById('query-active-slot').value || null
+      };
+
+      try {
+        const res = await fetch('/api/query', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+        const data = await res.json();
+
+        if (res.status !== 200) {
+          throw new Error(data.detail || "Erro na consulta");
+        }
+
+        document.getElementById('results-area').classList.remove('hidden');
+        document.getElementById('query-echo-text').textContent = query;
+        document.getElementById('query-echo-box').classList.remove('hidden');
+        if (payload.only_retrieve) {
+          document.getElementById('report-content').innerHTML = `
+            <div class="p-4 rounded-lg bg-dark-900 border border-amber-800/40 text-gray-300 space-y-2">
+              <div class="flex items-center gap-2 text-amber-400 font-semibold">
+                <i class="fa-solid fa-filter"></i> Modo de Recuperação Estrita (Apenas Extração Direta)
+              </div>
+              <p class="text-xs text-gray-400 leading-relaxed">
+                A opção <strong>"Apenas extrair texto"</strong> está ativada. A inteligência artificial não foi acionada para redigir o relatório. 
+                Os <strong>${data.found_chunks.length} trechos canônicos fundamentais</strong> foram extraídos diretamente dos clássicos e estão listados no painel ao lado direito para consulta pura.
+              </p>
+              <div class="text-xs text-gray-500 pt-1 border-t border-gray-800">
+                <i class="fa-solid fa-circle-info"></i> Para gerar o relatório analítico redigido com voz própria e sem referências acadêmicas, desmarque a opção <em>"Apenas extrair texto"</em> e clique novamente em Consultar.
+              </div>
+            </div>
+          `;
+        } else if (typeof marked !== 'undefined' && data.report) {
+          document.getElementById('report-content').innerHTML = marked.parse(data.report);
+        } else {
+          document.getElementById('report-content').textContent = data.report;
+        }
+        
+        // Cache Pill
+        const cachePill = document.getElementById('cache-hit-pill');
+        if (cachePill) {
+          if (data.from_cache) {
+            cachePill.classList.remove('hidden');
+          } else {
+            cachePill.classList.add('hidden');
+          }
+        }
+
+        // Fatos Técnicos / Variáveis identificadas
+        const factsBox = document.getElementById('facts-badge-container');
+        if (factsBox && data.dossier_facts) {
+          factsBox.innerHTML = '';
+          const f = data.dossier_facts;
+          if (f.ambiente_ou_casa) {
+            factsBox.innerHTML += `<span class="px-2 py-0.5 rounded bg-brand-950/70 border border-brand-500/30 text-brand-300 text-[10px]"><i class="fa-solid fa-compass"></i> ${f.ambiente_ou_casa}</span>`;
+          }
+          if (f.regencias_obrigatorias && f.regencias_obrigatorias.length > 0) {
+            f.regencias_obrigatorias.forEach(r => {
+              factsBox.innerHTML += `<span class="px-2 py-0.5 rounded bg-amber-950/70 border border-amber-500/30 text-amber-300 text-[10px]"><i class="fa-solid fa-link"></i> ${r}</span>`;
+            });
+          }
+          if (f.fatores_nucleares && f.fatores_nucleares.length > 0) {
+            f.fatores_nucleares.forEach(fn => {
+              factsBox.innerHTML += `<span class="px-2 py-0.5 rounded bg-blue-950/70 border border-blue-500/30 text-blue-300 text-[10px]"><i class="fa-solid fa-atom"></i> ${fn.nome}</span>`;
+            });
+          }
+          if (factsBox.innerHTML) {
+            factsBox.classList.remove('hidden');
+          } else {
+            factsBox.classList.add('hidden');
+          }
+        }
+
+        // LLM Badge
+        const badge = document.getElementById('llm-badge');
+        if (payload.only_retrieve) {
+          badge.textContent = 'Dossiê Estruturado Local (FlashRank | 0 Tokens Externos)';
+          badge.className = 'text-xs px-2.5 py-1 rounded bg-amber-900/40 text-amber-300 border border-amber-700/50';
+          badge.classList.remove('hidden');
+        } else if (data.from_cache) {
+          badge.textContent = `Cache Semântico Ativo (0 Tokens Consumidos | Hits: ${data.cache_hits || 1})`;
+          badge.className = 'text-xs px-2.5 py-1 rounded bg-emerald-900/60 text-emerald-300 border border-emerald-500/40';
+          badge.classList.remove('hidden');
+        } else if (data.llm_meta) {
+          const effortTxt = data.llm_meta.reasoning_effort && data.llm_meta.reasoning_effort !== 'none' ? ` | Effort: ${data.llm_meta.reasoning_effort}` : '';
+          badge.textContent = `${data.llm_meta.slot_label || 'Modelo'}: ${data.llm_meta.model} (${data.llm_meta.provider.toUpperCase()}${effortTxt})`;
+          badge.className = 'text-xs px-2.5 py-1 rounded bg-gray-800 text-gray-300 border border-gray-700';
+          badge.classList.remove('hidden');
+        } else {
+          badge.classList.add('hidden');
+        }
+
+        // Renderizar Chunks
+        const chunksList = document.getElementById('chunks-list');
+        document.getElementById('chunks-count').textContent = `${data.found_chunks.length} trecho(s) encontrado(s)`;
+        
+        if (data.found_chunks.length > 0) {
+          chunksList.innerHTML = data.found_chunks.map((c, i) => `
+            <div class="bg-dark-900 border border-gray-800 rounded-lg p-3 text-xs space-y-1.5">
+              <div class="flex items-center justify-between text-gray-400 font-semibold">
+                <span class="text-brand-300 flex items-center gap-1">
+                  <i class="fa-regular fa-file-pdf"></i> ${c.filename}
+                </span>
+                <span class="bg-dark-850 px-2 py-0.5 rounded border border-gray-700">Pág. ${c.page_number}</span>
+              </div>
+              <p class="text-gray-300 italic border-l-2 border-brand-500/50 pl-2 leading-relaxed">
+                "${c.content}"
+              </p>
+            </div>
+          `).join('');
+        } else {
+          chunksList.innerHTML = '<p class="text-xs text-gray-500 italic">Nenhum trecho retornado.</p>';
+        }
+
+      } catch (err) {
+        alert("Erro ao executar consulta: " + err.message);
+      } finally {
+        btn.innerHTML = '<i class="fa-solid fa-paper-plane"></i> <span>Gerar Análise</span>';
+        btn.disabled = false;
+      }
+    }
+
+    function copyReport() {
+      const text = document.getElementById('report-content').textContent;
+      navigator.clipboard.writeText(text);
+      alert("Relatório copiado para a área de transferência!");
+    }
+
+    function setQueryExample(text) {
+      const input = document.getElementById('query-input');
+      input.value = text;
+      input.focus();
+      updatePromptTokensEstimate();
+    }
+
+    function updatePromptTokensEstimate() {
+      const q = document.getElementById('query-input').value.trim();
+      const tokensEst = q ? Math.ceil(q.length / 4) + 450 : 0;
+      document.getElementById('top-tok-prompt').textContent = tokensEst.toLocaleString('pt-BR');
+    }
+
+    // Telemetria do Sistema a cada 2 segundos
+    async function fetchSystemTelemetry() {
+      try {
+        const res = await fetch('/api/system-telemetry');
+        const data = await res.json();
+        if (data.status === 'ok') {
+          document.getElementById('top-cpu').textContent = `${data.cpu_percent}%`;
+          document.getElementById('top-ram').textContent = `${data.ram_used_mb}MB`;
+          document.getElementById('top-disk').textContent = `${data.disk_used_gb}GB`;
+          document.getElementById('top-disk-pct').textContent = `${data.disk_percent}%`;
+          document.getElementById('top-tok-saved').textContent = (data.tokens_saved_total || 0).toLocaleString('pt-BR');
+          document.getElementById('top-docs-count').textContent = data.total_documents || 0;
+        }
+      } catch (err) {
+        console.debug("Telemetry error:", err);
+      }
+    }
+
+    // Ouvir digitação do prompt para estimativa em tempo real
+    document.getElementById('query-input').addEventListener('input', updatePromptTokensEstimate);
+
+    // Iniciar
+    loadConfig();
+    loadStats();
+    fetchSystemTelemetry();
+    setInterval(fetchSystemTelemetry, 2000);
+  </script>
+</body>
+</html>
