@@ -57,6 +57,15 @@
       font-family: 'JetBrains Mono', ui-monospace, monospace;
     }
     
+    /* Padrão sutil de grid/textura para Hero & Background */
+    .bg-grid-pattern {
+      background-size: 28px 28px;
+      background-image: radial-gradient(circle, rgba(148, 163, 184, 0.18) 1.2px, transparent 1.2px);
+    }
+    .dark .bg-grid-pattern {
+      background-image: radial-gradient(circle, rgba(255, 255, 255, 0.08) 1.2px, transparent 1.2px);
+    }
+    
     /* Scrollbars customizadas modernas e discretas */
     ::-webkit-scrollbar { width: 6px; height: 6px; }
     ::-webkit-scrollbar-track { background: transparent; }
@@ -153,32 +162,32 @@
 
     <!-- Navegação de Abas & Controles (Tema / Idioma) -->
     <div class="flex items-center gap-3">
-      <nav class="flex space-x-3 text-xs font-medium">
-        <button onclick="switchTab('landing')" id="tab-landing-btn" class="tab-btn active py-1 text-slate-600 dark:text-gray-300 hover:text-brand-600 dark:hover:text-white transition flex items-center gap-1.5 cursor-pointer">
-          <i class="fa-solid fa-house text-xs"></i> <span data-i18n="tabHome">Início</span>
+      <nav class="flex space-x-3.5 text-sm font-semibold">
+        <button onclick="switchTab('landing')" id="tab-landing-btn" class="tab-btn active py-1.5 text-slate-700 dark:text-gray-200 hover:text-brand-600 dark:hover:text-white transition flex items-center gap-2 cursor-pointer">
+          <i class="fa-solid fa-house text-sm"></i> <span data-i18n="tabHome">Início</span>
         </button>
-        <button onclick="switchTab('query')" id="tab-query-btn" class="tab-btn py-1 text-slate-500 dark:text-gray-400 hover:text-brand-600 dark:hover:text-white transition flex items-center gap-1.5 cursor-pointer">
-          <i class="fa-solid fa-wand-magic-sparkles text-xs"></i> <span data-i18n="tabQuery">Consulta</span>
+        <button onclick="switchTab('query')" id="tab-query-btn" class="tab-btn py-1.5 text-slate-500 dark:text-gray-400 hover:text-brand-600 dark:hover:text-white transition flex items-center gap-2 cursor-pointer">
+          <i class="fa-solid fa-wand-magic-sparkles text-sm"></i> <span data-i18n="tabQuery">Consulta</span>
         </button>
-        <button onclick="switchTab('docs')" id="tab-docs-btn" class="tab-btn py-1 text-slate-500 dark:text-gray-400 hover:text-brand-600 dark:hover:text-white transition flex items-center gap-1.5">
-          <i class="fa-solid fa-book-open text-xs"></i> <span data-i18n="tabDocs">Acervo</span> (<span id="top-docs-count">0</span>)
+        <button onclick="switchTab('docs')" id="tab-docs-btn" class="tab-btn py-1.5 text-slate-500 dark:text-gray-400 hover:text-brand-600 dark:hover:text-white transition flex items-center gap-2">
+          <i class="fa-solid fa-book-open text-sm"></i> <span data-i18n="tabDocs">Acervo</span> (<span id="top-docs-count">0</span>)
         </button>
-        <button onclick="switchTab('keys')" id="tab-keys-btn" class="tab-btn py-1 text-slate-500 dark:text-gray-400 hover:text-brand-600 dark:hover:text-white transition flex items-center gap-1.5">
-          <i class="fa-solid fa-sliders text-xs"></i> <span data-i18n="tabKeys">Modelos & Chaves</span>
+        <button onclick="switchTab('keys')" id="tab-keys-btn" class="tab-btn py-1.5 text-slate-500 dark:text-gray-400 hover:text-brand-600 dark:hover:text-white transition flex items-center gap-2">
+          <i class="fa-solid fa-sliders text-sm"></i> <span data-i18n="tabKeys">Modelos & Chaves</span>
         </button>
-        <button onclick="switchTab('arch')" id="tab-arch-btn" class="tab-btn py-1 text-slate-500 dark:text-gray-400 hover:text-brand-600 dark:hover:text-white transition flex items-center gap-1.5">
-          <i class="fa-solid fa-diagram-project text-xs text-brand-500"></i> <span data-i18n="tabArch">Como Funciona</span>
+        <button onclick="switchTab('arch')" id="tab-arch-btn" class="tab-btn py-1.5 text-slate-500 dark:text-gray-400 hover:text-brand-600 dark:hover:text-white transition flex items-center gap-2">
+          <i class="fa-solid fa-diagram-project text-sm text-brand-500"></i> <span data-i18n="tabArch">Como Funciona</span>
         </button>
       </nav>
 
       <!-- Alternador de Idioma (PT / EN) & Tema (Claro / Escuro) -->
-      <div class="flex items-center gap-1.5 pl-2 border-l border-slate-200 dark:border-gray-800">
+      <div class="flex items-center gap-2 pl-3 border-l border-slate-200 dark:border-gray-800">
         <button onclick="toggleLanguage()" id="btn-lang" title="Switch Language / Alternar Idioma" 
-                class="px-2 py-1 rounded text-[11px] font-bold bg-slate-100 hover:bg-slate-200 dark:bg-dark-900 dark:hover:bg-dark-800 text-slate-700 dark:text-gray-300 border border-slate-200 dark:border-gray-800 transition">
+                class="px-2.5 py-1.5 rounded-lg text-xs font-bold bg-slate-100 hover:bg-slate-200 dark:bg-dark-900 dark:hover:bg-dark-800 text-slate-700 dark:text-gray-200 border border-slate-200 dark:border-gray-800 transition shadow-sm">
           PT
         </button>
         <button onclick="toggleTheme()" id="btn-theme" title="Alternar Tema Claro / Escuro" 
-                class="w-7 h-7 rounded flex items-center justify-center text-xs bg-slate-100 hover:bg-slate-200 dark:bg-dark-900 dark:hover:bg-dark-800 text-slate-700 dark:text-amber-400 border border-slate-200 dark:border-gray-800 transition">
+                class="w-8 h-8 rounded-lg flex items-center justify-center text-sm bg-slate-100 hover:bg-slate-200 dark:bg-dark-900 dark:hover:bg-dark-800 text-slate-700 dark:text-amber-400 border border-slate-200 dark:border-gray-800 transition shadow-sm">
           <i class="fa-solid fa-moon dark:hidden"></i>
           <i class="fa-solid fa-sun hidden dark:inline"></i>
         </button>
@@ -187,200 +196,224 @@
   </header>
 
   <!-- CONTEÚDO PRINCIPAL -->
-  <main class="flex-1 max-w-7xl w-full mx-auto p-4 md:p-6 space-y-8">
+  <main class="flex-1 max-w-7xl w-full mx-auto p-4 md:p-8 space-y-12">
 
-    <!-- TAB 0: LANDING PAGE COM MINI PASSO EXPLICATIVO & CTA -->
-    <section id="tab-landing" class="space-y-10">
+    <!-- TAB 0: LANDING PAGE COM HERO CENTRALIZADO, DESIGN PREMIUM & MINI PASSO EXPLICATIVO -->
+    <section id="tab-landing" class="space-y-16 py-2">
       
-      <!-- HERO BANNER -->
-      <div class="relative overflow-hidden bg-gradient-to-br from-brand-900/40 via-white dark:via-dark-850 to-white dark:to-dark-850 border border-brand-500/30 rounded-3xl p-8 md:p-12 shadow-sm dark:shadow-2xl">
-        <div class="absolute -top-24 -right-24 w-96 h-96 bg-brand-500/10 rounded-full blur-3xl pointer-events-none"></div>
-        <div class="absolute -bottom-24 -left-24 w-80 h-80 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none"></div>
+      <!-- HERO BANNER CENTRALIZADO & ELEVADO -->
+      <div class="relative overflow-hidden rounded-3xl border border-slate-200/90 dark:border-white/10 bg-gradient-to-b from-white via-slate-50/90 to-brand-50/20 dark:from-dark-850 dark:via-dark-900 dark:to-dark-950 p-8 sm:p-12 md:p-16 shadow-2xl dark:shadow-[0_25px_60px_-15px_rgba(0,0,0,0.7)] backdrop-blur-2xl bg-grid-pattern">
+        <!-- Ambient Glowing Aura Orbs -->
+        <div class="absolute -top-24 left-1/2 -translate-x-1/2 w-[650px] h-[320px] bg-brand-500/15 dark:bg-brand-500/20 rounded-full blur-3xl pointer-events-none"></div>
+        <div class="absolute -bottom-32 -left-20 w-[420px] h-[420px] bg-cyan-500/10 dark:bg-cyan-500/15 rounded-full blur-3xl pointer-events-none"></div>
+        <div class="absolute -bottom-32 -right-20 w-[420px] h-[420px] bg-purple-500/10 dark:bg-purple-500/15 rounded-full blur-3xl pointer-events-none"></div>
 
-        <div class="relative z-10 max-w-3xl space-y-6">
-          <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-semibold bg-brand-100 text-brand-800 dark:bg-brand-950/70 dark:text-brand-300 border border-brand-300 dark:border-brand-700/60 shadow-sm">
-            <span class="w-2 h-2 rounded-full bg-brand-500 animate-pulse"></span>
+        <div class="relative z-10 max-w-4xl mx-auto flex flex-col items-center text-center space-y-8">
+          
+          <!-- BADGE DE STATUS CENTRALIZADA -->
+          <div class="inline-flex items-center gap-3 px-4 py-2 rounded-full text-xs sm:text-sm font-semibold bg-white/90 dark:bg-brand-950/80 text-brand-700 dark:text-brand-300 border border-brand-200/80 dark:border-brand-700/60 shadow-md backdrop-blur-md">
+            <span class="relative flex h-2.5 w-2.5">
+              <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-brand-400 opacity-75"></span>
+              <span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-brand-500"></span>
+            </span>
             <span data-i18n="heroBadge">Engine RAG de Duas Etapas • Zero-GPU • ~40 MB RAM</span>
           </div>
 
-          <h1 class="text-3xl md:text-5xl font-extrabold tracking-tight text-slate-900 dark:text-white leading-tight">
-            <span data-i18n="heroTitle1">Pesquisa Canônica de Alta Precisão &</span><br/>
-            <span class="bg-gradient-to-r from-brand-600 via-purple-500 to-indigo-500 bg-clip-text text-transparent" data-i18n="heroTitle2">Custo Mínimo de Tokens</span>
+          <!-- TÍTULO PRINCIPAL (FONTE EXPANDIDA & GRADIENTE) -->
+          <h1 class="text-4xl sm:text-6xl md:text-7xl font-black tracking-tight text-slate-900 dark:text-white leading-[1.12]">
+            <span data-i18n="heroTitle1">Pesquisa Canônica de Alta Precisão &</span>
+            <span class="block mt-2 bg-gradient-to-r from-brand-600 via-purple-600 to-indigo-600 dark:from-brand-400 dark:via-purple-300 dark:to-cyan-400 bg-clip-text text-transparent" data-i18n="heroTitle2">Custo Mínimo de Tokens</span>
           </h1>
 
-          <p class="text-sm md:text-base text-slate-600 dark:text-gray-300 leading-relaxed" data-i18n="heroDesc">
+          <!-- SUBTÍTULO / DESCRIÇÃO CENTRALIZADA (FONTE AUMENTADA & LEITURA CONFORTÁVEL) -->
+          <p class="text-base sm:text-lg md:text-xl text-slate-600 dark:text-gray-300 leading-relaxed font-normal max-w-3xl mx-auto" data-i18n="heroDesc">
             Elimina alucinações em literatura técnica, científica e jurídica orquestrando <strong>SQLite FTS5 lexical</strong>, o modelo local <strong>Mini-LLM FlashRank Cross-Encoder</strong> e <strong>Poda Extrativa de Sentenças</strong>. Reduza em 70% a 100% o consumo de tokens externos sem perder nenhum detalhe factual.
           </p>
 
-          <!-- BOTOES DE ACAO PRINCIPAIS (CTA) -->
-          <div class="flex flex-wrap items-center gap-4 pt-2">
-            <button onclick="enterSystem()" class="px-7 py-3.5 rounded-xl bg-brand-600 hover:bg-brand-500 text-white font-bold text-sm shadow-xl shadow-brand-600/30 hover:shadow-brand-500/50 hover:-translate-y-0.5 transition duration-200 flex items-center gap-2.5 cursor-pointer">
+          <!-- BOTÕES DE AÇÃO PRINCIPAIS (CTAs GRANDES & MODERNOS) -->
+          <div class="flex flex-wrap items-center justify-center gap-4 pt-2">
+            <button onclick="enterSystem()" class="group px-8 sm:px-10 py-4 sm:py-4.5 rounded-2xl bg-gradient-to-r from-brand-600 via-brand-500 to-indigo-600 hover:from-brand-500 hover:to-indigo-500 text-white font-bold text-base sm:text-lg shadow-xl shadow-brand-600/30 hover:shadow-brand-500/50 hover:scale-[1.03] active:scale-[0.98] transition-all duration-200 flex items-center gap-3 cursor-pointer">
               <span data-i18n="btnEnterSystem">Entrar no Sistema</span>
-              <i class="fa-solid fa-arrow-right text-xs"></i>
+              <i class="fa-solid fa-arrow-right text-sm transition-transform duration-200 group-hover:translate-x-1.5"></i>
             </button>
-            <button onclick="switchTab('arch')" class="px-6 py-3.5 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-dark-800 dark:hover:bg-dark-750 text-slate-700 dark:text-gray-300 font-semibold text-sm border border-slate-200 dark:border-gray-700 hover:border-brand-500/40 transition flex items-center gap-2 cursor-pointer">
+            <button onclick="switchTab('arch')" class="px-7 sm:px-9 py-4 sm:py-4.5 rounded-2xl bg-white/90 hover:bg-slate-100 dark:bg-dark-800/90 dark:hover:bg-dark-750 text-slate-700 dark:text-gray-200 font-bold text-base sm:text-lg border border-slate-200/90 dark:border-gray-700/80 hover:border-brand-500/50 backdrop-blur-md hover:scale-[1.03] active:scale-[0.98] transition-all duration-200 flex items-center gap-2.5 cursor-pointer shadow-sm">
               <i class="fa-solid fa-diagram-project text-brand-500"></i>
               <span data-i18n="btnSeeArch">Ver Arquitetura Técnica</span>
             </button>
           </div>
 
-          <!-- STRIP DE METRICAS ESTATISTICAS -->
-          <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-4 border-t border-slate-200/60 dark:border-gray-800/80">
-            <div class="p-3 rounded-xl bg-slate-50/80 dark:bg-dark-900/60 border border-slate-200/80 dark:border-gray-800">
-              <div class="text-[10px] text-slate-500 dark:text-gray-400 font-semibold uppercase" data-i18n="kpi1Title">Memória em Repouso</div>
-              <div class="text-base font-extrabold text-emerald-600 dark:text-emerald-400 font-mono mt-0.5">~40 MB RAM</div>
-              <div class="text-[10px] text-slate-400 dark:text-gray-500" data-i18n="kpi1Sub">Zero-GPU (100% CPU)</div>
-            </div>
-            <div class="p-3 rounded-xl bg-slate-50/80 dark:bg-dark-900/60 border border-slate-200/80 dark:border-gray-800">
-              <div class="text-[10px] text-slate-500 dark:text-gray-400 font-semibold uppercase" data-i18n="kpi2Title">Economia de Tokens</div>
-              <div class="text-base font-extrabold text-brand-600 dark:text-brand-400 font-mono mt-0.5">-70% a -100%</div>
-              <div class="text-[10px] text-slate-400 dark:text-gray-500" data-i18n="kpi2Sub">Poda + Cache Semântico</div>
-            </div>
-            <div class="p-3 rounded-xl bg-slate-50/80 dark:bg-dark-900/60 border border-slate-200/80 dark:border-gray-800">
-              <div class="text-[10px] text-slate-500 dark:text-gray-400 font-semibold uppercase" data-i18n="kpi3Title">Varredura BM25</div>
-              <div class="text-base font-extrabold text-indigo-600 dark:text-indigo-400 font-mono mt-0.5">&lt; 15 ms</div>
-              <div class="text-[10px] text-slate-400 dark:text-gray-500" data-i18n="kpi3Sub">60.000+ chunks FTS5</div>
-            </div>
-            <div class="p-3 rounded-xl bg-slate-50/80 dark:bg-dark-900/60 border border-slate-200/80 dark:border-gray-800">
-              <div class="text-[10px] text-slate-500 dark:text-gray-400 font-semibold uppercase" data-i18n="kpi4Title">Cache Semântico</div>
-              <div class="text-base font-extrabold text-purple-600 dark:text-purple-400 font-mono mt-0.5">&lt; 10 ms</div>
-              <div class="text-[10px] text-slate-400 dark:text-gray-500" data-i18n="kpi4Sub">0 Tokens ($0,00)</div>
+          <!-- STRIP DE MÉTRICAS ESTATÍSTICAS CENTRALIZADA (NÚMEROS GRANDES) -->
+          <div class="w-full pt-8 mt-4 border-t border-slate-200/80 dark:border-white/10">
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-6">
+              
+              <div class="p-5 rounded-2xl bg-white/80 dark:bg-dark-900/80 border border-slate-200/80 dark:border-white/10 shadow-sm hover:border-emerald-500/40 hover:-translate-y-1 transition-all duration-200 flex flex-col items-center justify-center text-center">
+                <div class="text-xs font-bold text-slate-500 dark:text-gray-400 uppercase tracking-wider" data-i18n="kpi1Title">Memória em Repouso</div>
+                <div class="text-3xl sm:text-4xl font-black text-emerald-600 dark:text-emerald-400 font-mono tracking-tight my-1.5">~40 MB</div>
+                <div class="text-xs text-slate-400 dark:text-gray-500 font-medium" data-i18n="kpi1Sub">Zero-GPU (100% CPU)</div>
+              </div>
+
+              <div class="p-5 rounded-2xl bg-white/80 dark:bg-dark-900/80 border border-slate-200/80 dark:border-white/10 shadow-sm hover:border-brand-500/40 hover:-translate-y-1 transition-all duration-200 flex flex-col items-center justify-center text-center">
+                <div class="text-xs font-bold text-slate-500 dark:text-gray-400 uppercase tracking-wider" data-i18n="kpi2Title">Economia de Tokens</div>
+                <div class="text-3xl sm:text-4xl font-black text-brand-600 dark:text-brand-400 font-mono tracking-tight my-1.5">-70% a -100%</div>
+                <div class="text-xs text-slate-400 dark:text-gray-500 font-medium" data-i18n="kpi2Sub">Poda + Cache Semântico</div>
+              </div>
+
+              <div class="p-5 rounded-2xl bg-white/80 dark:bg-dark-900/80 border border-slate-200/80 dark:border-white/10 shadow-sm hover:border-indigo-500/40 hover:-translate-y-1 transition-all duration-200 flex flex-col items-center justify-center text-center">
+                <div class="text-xs font-bold text-slate-500 dark:text-gray-400 uppercase tracking-wider" data-i18n="kpi3Title">Varredura BM25</div>
+                <div class="text-3xl sm:text-4xl font-black text-indigo-600 dark:text-indigo-400 font-mono tracking-tight my-1.5">&lt; 15 ms</div>
+                <div class="text-xs text-slate-400 dark:text-gray-500 font-medium" data-i18n="kpi3Sub">60.000+ chunks FTS5</div>
+              </div>
+
+              <div class="p-5 rounded-2xl bg-white/80 dark:bg-dark-900/80 border border-slate-200/80 dark:border-white/10 shadow-sm hover:border-purple-500/40 hover:-translate-y-1 transition-all duration-200 flex flex-col items-center justify-center text-center">
+                <div class="text-xs font-bold text-slate-500 dark:text-gray-400 uppercase tracking-wider" data-i18n="kpi4Title">Cache Semântico</div>
+                <div class="text-3xl sm:text-4xl font-black text-purple-600 dark:text-purple-400 font-mono tracking-tight my-1.5">&lt; 10 ms</div>
+                <div class="text-xs text-slate-400 dark:text-gray-500 font-medium" data-i18n="kpi4Sub">0 Tokens ($0,00)</div>
+              </div>
+
             </div>
           </div>
+
         </div>
       </div>
 
-      <!-- MINI PASSO EXPLICATIVO DE COMO FUNCIONA (4 ETAPAS SIMPLES) -->
-      <div class="space-y-6">
-        <div class="text-center max-w-2xl mx-auto space-y-2">
-          <span class="text-xs font-bold uppercase tracking-wider text-brand-600 dark:text-brand-400" data-i18n="miniStepsBadge">Mini Passo a Passo</span>
-          <h2 class="text-2xl font-bold text-slate-900 dark:text-white" data-i18n="miniStepsTitle">Como o CanonicalRAG Funciona em 4 Passos</h2>
-          <p class="text-xs text-slate-500 dark:text-gray-400" data-i18n="miniStepsDesc">Um funil cirúrgico que transforma acervos de milhares de páginas em respostas canônicas definitivas:</p>
+      <!-- MINI PASSO EXPLICATIVO DE COMO FUNCIONA (4 ETAPAS COM VISUAL MODERNO) -->
+      <div class="space-y-8">
+        <div class="text-center max-w-3xl mx-auto space-y-3">
+          <div class="inline-flex items-center gap-2 px-3.5 py-1 rounded-full text-xs font-bold uppercase tracking-widest bg-brand-100 dark:bg-brand-950/70 text-brand-700 dark:text-brand-300 border border-brand-200 dark:border-brand-800" data-i18n="miniStepsBadge">Mini Passo a Passo</div>
+          <h2 class="text-3xl sm:text-4xl md:text-5xl font-extrabold text-slate-900 dark:text-white tracking-tight" data-i18n="miniStepsTitle">Como o CanonicalRAG Funciona em 4 Passos</h2>
+          <p class="text-base sm:text-lg text-slate-600 dark:text-gray-300 leading-relaxed max-w-2xl mx-auto" data-i18n="miniStepsDesc">Um funil cirúrgico que transforma acervos de milhares de páginas em respostas canônicas definitivas:</p>
         </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          
           <!-- Passo 1 -->
-          <div class="bg-white dark:bg-dark-850 border border-slate-200 dark:border-gray-800 rounded-2xl p-6 shadow-sm dark:shadow-xl space-y-3 relative hover:border-brand-500/50 transition duration-200 flex flex-col justify-between">
+          <div class="bg-white/90 dark:bg-dark-850/90 border border-slate-200/80 dark:border-white/10 rounded-2xl p-6 shadow-md dark:shadow-xl space-y-4 hover:border-blue-500/50 hover:-translate-y-1.5 transition-all duration-300 flex flex-col justify-between group">
             <div class="flex items-center justify-between">
-              <span class="w-8 h-8 rounded-xl bg-blue-100 dark:bg-blue-950/60 text-blue-600 dark:text-blue-400 flex items-center justify-center font-bold text-sm">1</span>
-              <span class="text-[10px] font-mono px-2 py-0.5 rounded bg-slate-100 dark:bg-dark-900 text-slate-500 dark:text-gray-400">&lt; 15ms</span>
+              <span class="w-10 h-10 rounded-2xl bg-gradient-to-br from-blue-500 to-cyan-500 text-white flex items-center justify-center font-extrabold text-base shadow-md shadow-blue-500/20">1</span>
+              <span class="text-xs font-mono font-bold px-2.5 py-1 rounded-lg bg-blue-50 dark:bg-blue-950/60 text-blue-600 dark:text-blue-400 border border-blue-200 dark:border-blue-800/60">&lt; 15ms</span>
             </div>
-            <div class="space-y-1.5">
-              <h3 class="text-sm font-bold text-slate-900 dark:text-white flex items-center gap-1.5" data-i18n="miniStep1Title">
-                <i class="fa-solid fa-database text-blue-500 text-xs"></i> 1. Busca Ampla FTS5
+            <div class="space-y-2">
+              <h3 class="text-lg font-bold text-slate-900 dark:text-white flex items-center gap-2" data-i18n="miniStep1Title">
+                <i class="fa-solid fa-database text-blue-500 text-sm"></i> 1. Busca Ampla FTS5
               </h3>
-              <p class="text-xs text-slate-600 dark:text-gray-300 leading-relaxed" data-i18n="miniStep1Desc">
+              <p class="text-sm text-slate-600 dark:text-gray-300 leading-relaxed" data-i18n="miniStep1Desc">
                 Varredura instantânea de mais de 60.000 fragmentos no SQLite FTS5 nativo via BM25 e proximidade léxica (NEAR), isolando os 20 melhores candidatos.
               </p>
             </div>
-            <div class="pt-2 border-t border-slate-100 dark:border-gray-800 text-[11px] text-blue-600 dark:text-blue-400 font-medium">
-              <i class="fa-solid fa-filter text-[10px]"></i> Top 20 Candidatos
+            <div class="pt-3 border-t border-slate-100 dark:border-gray-800 text-xs text-blue-600 dark:text-blue-400 font-bold flex items-center gap-1.5">
+              <i class="fa-solid fa-filter text-xs"></i> Top 20 Candidatos
             </div>
           </div>
 
           <!-- Passo 2 -->
-          <div class="bg-white dark:bg-dark-850 border border-slate-200 dark:border-gray-800 rounded-2xl p-6 shadow-sm dark:shadow-xl space-y-3 relative hover:border-brand-500/50 transition duration-200 flex flex-col justify-between">
+          <div class="bg-white/90 dark:bg-dark-850/90 border border-slate-200/80 dark:border-white/10 rounded-2xl p-6 shadow-md dark:shadow-xl space-y-4 hover:border-indigo-500/50 hover:-translate-y-1.5 transition-all duration-300 flex flex-col justify-between group">
             <div class="flex items-center justify-between">
-              <span class="w-8 h-8 rounded-xl bg-indigo-100 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 flex items-center justify-center font-bold text-sm">2</span>
-              <span class="text-[10px] font-mono px-2 py-0.5 rounded bg-slate-100 dark:bg-dark-900 text-slate-500 dark:text-gray-400">~0.8s CPU</span>
+              <span class="w-10 h-10 rounded-2xl bg-gradient-to-br from-indigo-500 to-purple-500 text-white flex items-center justify-center font-extrabold text-base shadow-md shadow-indigo-500/20">2</span>
+              <span class="text-xs font-mono font-bold px-2.5 py-1 rounded-lg bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 border border-indigo-200 dark:border-indigo-800/60">~0.8s CPU</span>
             </div>
-            <div class="space-y-1.5">
-              <h3 class="text-sm font-bold text-slate-900 dark:text-white flex items-center gap-1.5" data-i18n="miniStep2Title">
-                <i class="fa-solid fa-microchip text-indigo-500 text-xs"></i> 2. Mini-LLM FlashRank
+            <div class="space-y-2">
+              <h3 class="text-lg font-bold text-slate-900 dark:text-white flex items-center gap-2" data-i18n="miniStep2Title">
+                <i class="fa-solid fa-microchip text-indigo-500 text-sm"></i> 2. Mini-LLM FlashRank
               </h3>
-              <p class="text-xs text-slate-600 dark:text-gray-300 leading-relaxed" data-i18n="miniStep2Desc">
-                O Cross-Encoder local <code class="font-mono text-brand-600 dark:text-brand-300">MiniLM-L-12</code> roda na CPU via ONNX e calcula a atenção cruzada real, elegendo os 5 fragmentos mais densos.
+              <p class="text-sm text-slate-600 dark:text-gray-300 leading-relaxed" data-i18n="miniStep2Desc">
+                O Cross-Encoder local <code class="font-mono text-brand-600 dark:text-brand-300 font-semibold">MiniLM-L-12</code> roda na CPU via ONNX e calcula a atenção cruzada real, elegendo os 5 fragmentos mais densos.
               </p>
             </div>
-            <div class="pt-2 border-t border-slate-100 dark:border-gray-800 text-[11px] text-indigo-600 dark:text-indigo-400 font-medium">
-              <i class="fa-solid fa-award text-[10px]"></i> Top 5 Reranqueados
+            <div class="pt-3 border-t border-slate-100 dark:border-gray-800 text-xs text-indigo-600 dark:text-indigo-400 font-bold flex items-center gap-1.5">
+              <i class="fa-solid fa-award text-xs"></i> Top 5 Reranqueados
             </div>
           </div>
 
           <!-- Passo 3 -->
-          <div class="bg-white dark:bg-dark-850 border border-slate-200 dark:border-gray-800 rounded-2xl p-6 shadow-sm dark:shadow-xl space-y-3 relative hover:border-brand-500/50 transition duration-200 flex flex-col justify-between">
+          <div class="bg-white/90 dark:bg-dark-850/90 border border-slate-200/80 dark:border-white/10 rounded-2xl p-6 shadow-md dark:shadow-xl space-y-4 hover:border-purple-500/50 hover:-translate-y-1.5 transition-all duration-300 flex flex-col justify-between group">
             <div class="flex items-center justify-between">
-              <span class="w-8 h-8 rounded-xl bg-purple-100 dark:bg-purple-950/60 text-purple-600 dark:text-purple-400 flex items-center justify-center font-bold text-sm">3</span>
-              <span class="text-[10px] font-mono px-2 py-0.5 rounded bg-slate-100 dark:bg-dark-900 text-emerald-600 dark:text-emerald-400 font-bold">-70% Tokens</span>
+              <span class="w-10 h-10 rounded-2xl bg-gradient-to-br from-purple-500 to-pink-500 text-white flex items-center justify-center font-extrabold text-base shadow-md shadow-purple-500/20">3</span>
+              <span class="text-xs font-mono font-bold px-2.5 py-1 rounded-lg bg-emerald-50 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800/60 font-bold">-70% Tokens</span>
             </div>
-            <div class="space-y-1.5">
-              <h3 class="text-sm font-bold text-slate-900 dark:text-white flex items-center gap-1.5" data-i18n="miniStep3Title">
-                <i class="fa-solid fa-scissors text-purple-500 text-xs"></i> 3. Poda de Sentenças
+            <div class="space-y-2">
+              <h3 class="text-lg font-bold text-slate-900 dark:text-white flex items-center gap-2" data-i18n="miniStep3Title">
+                <i class="fa-solid fa-scissors text-purple-500 text-sm"></i> 3. Poda de Sentenças
               </h3>
-              <p class="text-xs text-slate-600 dark:text-gray-300 leading-relaxed" data-i18n="miniStep3Desc">
+              <p class="text-sm text-slate-600 dark:text-gray-300 leading-relaxed" data-i18n="miniStep3Desc">
                 O UniversalDossierBuilder quebra os trechos e descarta saudações, introduções e pontes vazias, reduzindo o prompt de ~1.200 para apenas ~350 tokens.
               </p>
             </div>
-            <div class="pt-2 border-t border-slate-100 dark:border-gray-800 text-[11px] text-purple-600 dark:text-purple-400 font-medium">
-              <i class="fa-solid fa-feather text-[10px]"></i> Dossiê de Alta Densidade
+            <div class="pt-3 border-t border-slate-100 dark:border-gray-800 text-xs text-purple-600 dark:text-purple-400 font-bold flex items-center gap-1.5">
+              <i class="fa-solid fa-feather text-xs"></i> Dossiê de Alta Densidade
             </div>
           </div>
 
           <!-- Passo 4 -->
-          <div class="bg-white dark:bg-dark-850 border border-slate-200 dark:border-gray-800 rounded-2xl p-6 shadow-sm dark:shadow-xl space-y-3 relative hover:border-brand-500/50 transition duration-200 flex flex-col justify-between">
+          <div class="bg-white/90 dark:bg-dark-850/90 border border-slate-200/80 dark:border-white/10 rounded-2xl p-6 shadow-md dark:shadow-xl space-y-4 hover:border-emerald-500/50 hover:-translate-y-1.5 transition-all duration-300 flex flex-col justify-between group">
             <div class="flex items-center justify-between">
-              <span class="w-8 h-8 rounded-xl bg-emerald-100 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 flex items-center justify-center font-bold text-sm">4</span>
-              <span class="text-[10px] font-mono px-2 py-0.5 rounded bg-slate-100 dark:bg-dark-900 text-purple-600 dark:text-purple-400">Prompt Caching</span>
+              <span class="w-10 h-10 rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-500 text-white flex items-center justify-center font-extrabold text-base shadow-md shadow-emerald-500/20">4</span>
+              <span class="text-xs font-mono font-bold px-2.5 py-1 rounded-lg bg-purple-50 dark:bg-purple-950/60 text-purple-600 dark:text-purple-400 border border-purple-200 dark:border-purple-800/60 font-medium">Prompt Caching</span>
             </div>
-            <div class="space-y-1.5">
-              <h3 class="text-sm font-bold text-slate-900 dark:text-white flex items-center gap-1.5" data-i18n="miniStep4Title">
-                <i class="fa-solid fa-bolt text-emerald-500 text-xs"></i> 4. Síntese & Cache SHA-256
+            <div class="space-y-2">
+              <h3 class="text-lg font-bold text-slate-900 dark:text-white flex items-center gap-2" data-i18n="miniStep4Title">
+                <i class="fa-solid fa-bolt text-emerald-500 text-sm"></i> 4. Síntese & Cache SHA-256
               </h3>
-              <p class="text-xs text-slate-600 dark:text-gray-300 leading-relaxed" data-i18n="miniStep4Desc">
+              <p class="text-sm text-slate-600 dark:text-gray-300 leading-relaxed" data-i18n="miniStep4Desc">
                 O Gateway multi-LLM (Claude / Gemini) gera o relatório final respaldado nos extratos. O resultado é armazenado em cache para responder em 4ms sem novos custos.
               </p>
             </div>
-            <div class="pt-2 border-t border-slate-100 dark:border-gray-800 text-[11px] text-emerald-600 dark:text-emerald-400 font-medium">
-              <i class="fa-solid fa-circle-check text-[10px]"></i> Resposta Pronta & Salva
+            <div class="pt-3 border-t border-slate-100 dark:border-gray-800 text-xs text-emerald-600 dark:text-emerald-400 font-bold flex items-center gap-1.5">
+              <i class="fa-solid fa-circle-check text-xs"></i> Resposta Pronta & Salva
             </div>
           </div>
+
         </div>
       </div>
 
-      <!-- DESTAQUES E VANTAGENS DO MOTOR (3 CARDS) -->
+      <!-- DESTAQUES E VANTAGENS DO MOTOR (3 CARDS COM VISUAL PREMIUM) -->
       <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div class="bg-white dark:bg-dark-850 border border-slate-200 dark:border-gray-800 rounded-2xl p-6 shadow-sm dark:shadow-xl space-y-3">
-          <div class="w-10 h-10 rounded-xl bg-emerald-50 dark:bg-emerald-950/50 text-emerald-600 dark:text-emerald-400 flex items-center justify-center text-lg">
+        
+        <div class="bg-white/90 dark:bg-dark-850/90 border border-slate-200/80 dark:border-white/10 rounded-2xl p-8 shadow-md dark:shadow-xl space-y-4 hover:border-emerald-500/40 hover:-translate-y-1.5 transition-all duration-300">
+          <div class="w-14 h-14 rounded-2xl bg-gradient-to-br from-emerald-500/20 to-teal-500/10 border border-emerald-500/30 text-emerald-600 dark:text-emerald-400 flex items-center justify-center text-2xl shadow-inner">
             <i class="fa-solid fa-leaf"></i>
           </div>
-          <h3 class="text-base font-bold text-slate-900 dark:text-white" data-i18n="feat1Title">Zero-GPU & Consumo Mínimo</h3>
-          <p class="text-xs text-slate-600 dark:text-gray-300 leading-relaxed" data-i18n="feat1Desc">
+          <h3 class="text-xl font-bold text-slate-900 dark:text-white" data-i18n="feat1Title">Zero-GPU & Consumo Mínimo</h3>
+          <p class="text-sm sm:text-base text-slate-600 dark:text-gray-300 leading-relaxed" data-i18n="feat1Desc">
             Funciona com menos de 100 MB de RAM em servidores modestos (1 vCPU, 1 GB RAM). Sem a complexidade de contêineres pesados como Milvus, Qdrant ou Elasticsearch.
           </p>
         </div>
 
-        <div class="bg-white dark:bg-dark-850 border border-slate-200 dark:border-gray-800 rounded-2xl p-6 shadow-sm dark:shadow-xl space-y-3">
-          <div class="w-10 h-10 rounded-xl bg-brand-50 dark:bg-brand-950/50 text-brand-600 dark:text-brand-400 flex items-center justify-center text-lg">
+        <div class="bg-white/90 dark:bg-dark-850/90 border border-slate-200/80 dark:border-white/10 rounded-2xl p-8 shadow-md dark:shadow-xl space-y-4 hover:border-brand-500/40 hover:-translate-y-1.5 transition-all duration-300">
+          <div class="w-14 h-14 rounded-2xl bg-gradient-to-br from-brand-500/20 to-purple-500/10 border border-brand-500/30 text-brand-600 dark:text-brand-400 flex items-center justify-center text-2xl shadow-inner">
             <i class="fa-solid fa-shield-halved"></i>
           </div>
-          <h3 class="text-base font-bold text-slate-900 dark:text-white" data-i18n="feat2Title">Fidelidade Factual Estrita</h3>
-          <p class="text-xs text-slate-600 dark:text-gray-300 leading-relaxed" data-i18n="feat2Desc">
+          <h3 class="text-xl font-bold text-slate-900 dark:text-white" data-i18n="feat2Title">Fidelidade Factual Estrita</h3>
+          <p class="text-sm sm:text-base text-slate-600 dark:text-gray-300 leading-relaxed" data-i18n="feat2Desc">
             Combina BM25 para termos exatos, números de normas e fórmulas com reranking semântico cross-encoder, eliminando as alucinações típicas de RAGs tradicionais.
           </p>
         </div>
 
-        <div class="bg-white dark:bg-dark-850 border border-slate-200 dark:border-gray-800 rounded-2xl p-6 shadow-sm dark:shadow-xl space-y-3">
-          <div class="w-10 h-10 rounded-xl bg-indigo-50 dark:bg-indigo-950/50 text-indigo-600 dark:text-indigo-400 flex items-center justify-center text-lg">
+        <div class="bg-white/90 dark:bg-dark-850/90 border border-slate-200/80 dark:border-white/10 rounded-2xl p-8 shadow-md dark:shadow-xl space-y-4 hover:border-indigo-500/40 hover:-translate-y-1.5 transition-all duration-300">
+          <div class="w-14 h-14 rounded-2xl bg-gradient-to-br from-indigo-500/20 to-cyan-500/10 border border-indigo-500/30 text-indigo-600 dark:text-indigo-400 flex items-center justify-center text-2xl shadow-inner">
             <i class="fa-solid fa-network-wired"></i>
           </div>
-          <h3 class="text-base font-bold text-slate-900 dark:text-white" data-i18n="feat3Title">Gateway Multi-LLM Resiliente</h3>
-          <p class="text-xs text-slate-600 dark:text-gray-300 leading-relaxed" data-i18n="feat3Desc">
+          <h3 class="text-xl font-bold text-slate-900 dark:text-white" data-i18n="feat3Title">Gateway Multi-LLM Resiliente</h3>
+          <p class="text-sm sm:text-base text-slate-600 dark:text-gray-300 leading-relaxed" data-i18n="feat3Desc">
             Pool de chaves com rotação Round-Robin, failover automático entre provedores (Claude, Gemini, OpenRouter) e modo de Extração Direta 100% gratuito.
           </p>
         </div>
+
       </div>
 
-      <!-- BANNER CTA DE CONVERSAO INFERIOR -->
-      <div class="bg-gradient-to-r from-brand-900/60 via-brand-800/40 to-indigo-900/40 border border-brand-500/40 rounded-3xl p-8 md:p-10 shadow-xl flex flex-col md:flex-row items-center justify-between gap-6">
-        <div class="space-y-2 text-center md:text-left">
-          <h3 class="text-xl md:text-2xl font-bold text-slate-900 dark:text-white" data-i18n="ctaBottomTitle">Pronto para consultar seu acervo canônico?</h3>
-          <p class="text-xs md:text-sm text-slate-600 dark:text-gray-300 max-w-xl" data-i18n="ctaBottomDesc">
+      <!-- BANNER CTA DE CONVERSÃO INFERIOR (CENTRALIZADO & ALTO IMPACTO) -->
+      <div class="relative overflow-hidden rounded-3xl border border-brand-500/40 bg-gradient-to-br from-brand-950 via-slate-900 to-indigo-950 dark:from-brand-950 dark:via-dark-900 dark:to-indigo-950 p-10 md:p-14 shadow-2xl text-center flex flex-col items-center space-y-6">
+        <div class="absolute -top-24 left-1/2 -translate-x-1/2 w-96 h-96 bg-brand-500/20 rounded-full blur-3xl pointer-events-none"></div>
+        
+        <div class="relative z-10 space-y-3 max-w-2xl mx-auto">
+          <h3 class="text-3xl sm:text-4xl md:text-5xl font-black text-white tracking-tight" data-i18n="ctaBottomTitle">Pronto para consultar seu acervo canônico?</h3>
+          <p class="text-base sm:text-lg text-slate-300 leading-relaxed font-normal" data-i18n="ctaBottomDesc">
             Acesse a interface de consulta, digite perguntas técnicas e receba relatórios estruturados com máxima fidelidade documental e economia de tokens.
           </p>
         </div>
-        <button onclick="enterSystem()" class="px-8 py-4 rounded-xl bg-brand-600 hover:bg-brand-500 text-white font-bold text-sm shadow-xl shadow-brand-600/30 hover:shadow-brand-500/50 hover:-translate-y-0.5 transition duration-200 flex items-center gap-2.5 whitespace-nowrap cursor-pointer">
+
+        <button onclick="enterSystem()" class="relative z-10 group px-10 py-5 rounded-2xl bg-gradient-to-r from-brand-500 via-brand-600 to-indigo-600 hover:from-brand-400 hover:to-indigo-500 text-white font-extrabold text-lg shadow-2xl shadow-brand-500/40 hover:scale-105 active:scale-95 transition-all duration-200 flex items-center gap-3 cursor-pointer">
           <span data-i18n="btnEnterSystemNow">Entrar no Sistema Agora</span>
-          <i class="fa-solid fa-arrow-right text-xs"></i>
+          <i class="fa-solid fa-arrow-right text-base transition-transform duration-200 group-hover:translate-x-2"></i>
         </button>
       </div>
 
