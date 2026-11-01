@@ -12,6 +12,7 @@
   
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/dompurify@3.1.6/dist/purify.min.js"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   
   <script>
@@ -545,7 +546,7 @@
           <div id="reading-progress-bar" class="h-0.5 bg-gradient-to-r from-brand-500 via-purple-500 to-emerald-400 w-0 transition-all duration-150 absolute top-0 left-0 right-0"></div>
 
           <!-- Barra de Ações do Relatório -->
-          <div class="flex flex-wrap items-center justify-between border-b border-slate-100 dark:border-gray-800 pb-4 mb-3 gap-2">
+          <div class="no-print flex flex-wrap items-center justify-between border-b border-slate-100 dark:border-gray-800 pb-4 mb-3 gap-2">
             <div class="flex items-center gap-2.5">
               <span class="w-7 h-7 rounded-lg bg-brand-50 dark:bg-brand-950/60 text-brand-600 dark:text-brand-400 flex items-center justify-center text-xs">
                 <i class="fa-solid fa-file-lines"></i>
@@ -561,10 +562,10 @@
               
               <!-- Ajuste de Tamanho da Fonte (A- / A+) -->
               <div class="flex items-center rounded-lg border border-slate-200 dark:border-gray-800 bg-slate-50 dark:bg-dark-900 p-0.5 text-xs font-mono">
-                <button onclick="adjustReportFontSize(-1)" class="px-2 py-0.5 rounded text-slate-600 dark:text-gray-400 hover:text-brand-600 dark:hover:text-white transition" title="Diminuir fonte">
+                <button onclick="adjustReportFontSize(-1)" class="px-2 py-0.5 rounded text-slate-600 dark:text-gray-400 hover:text-brand-600 dark:hover:text-white transition cursor-pointer" title="Diminuir fonte">
                   A-
                 </button>
-                <button onclick="adjustReportFontSize(1)" class="px-2 py-0.5 rounded text-slate-600 dark:text-gray-400 hover:text-brand-600 dark:hover:text-white transition" title="Aumentar fonte">
+                <button onclick="adjustReportFontSize(1)" class="px-2 py-0.5 rounded text-slate-600 dark:text-gray-400 hover:text-brand-600 dark:hover:text-white transition cursor-pointer" title="Aumentar fonte">
                   A+
                 </button>
               </div>
@@ -575,27 +576,19 @@
                       title="Ocultar ou Exibir painel de trechos fontes">
                 <i class="fa-solid fa-arrows-split-up-and-left"></i> <span id="toggle-sources-text" data-i18n="hideSources">Ocultar Fontes</span>
               </button>
-              <span id="llm-badge" class="text-[11px] px-2.5 py-1 rounded bg-slate-100 dark:bg-gray-800 text-slate-700 dark:text-gray-300 border border-slate-200 dark:border-gray-700 font-mono"></span>
-              
-              <!-- Botão Ocultar / Expandir Chunks -->
-              <button onclick="toggleSourcesColumn()" id="btn-toggle-sources" 
-                      class="text-xs bg-slate-100 hover:bg-slate-200 dark:bg-gray-800 dark:hover:bg-gray-700 text-slate-700 dark:text-gray-300 px-3 py-1.5 rounded transition flex items-center gap-1.5"
-                      title="Ocultar ou Exibir painel de trechos fontes">
-                <i class="fa-solid fa-arrows-split-up-and-left"></i> <span id="toggle-sources-text" data-i18n="hideSources">Ocultar Fontes</span>
-              </button>
 
               <!-- Botão Copiar -->
-              <button onclick="copyReport()" class="text-xs bg-slate-100 hover:bg-slate-200 dark:bg-gray-800 dark:hover:bg-gray-700 text-slate-700 dark:text-gray-300 px-3 py-1.5 rounded transition flex items-center gap-1" title="Copiar texto">
+              <button onclick="copyReport()" class="text-xs bg-slate-100 hover:bg-slate-200 dark:bg-dark-900 dark:hover:bg-dark-800 text-slate-700 dark:text-gray-300 px-3 py-1.5 rounded-lg border border-slate-200 dark:border-gray-800 transition flex items-center gap-1.5 cursor-pointer" title="Copiar texto">
                 <i class="fa-regular fa-copy"></i> <span data-i18n="copy">Copiar</span>
               </button>
 
               <!-- Botão Baixar Markdown -->
-              <button onclick="downloadReportMarkdown()" class="text-xs bg-slate-100 hover:bg-slate-200 dark:bg-gray-800 dark:hover:bg-gray-700 text-slate-700 dark:text-gray-300 px-3 py-1.5 rounded transition flex items-center gap-1" title="Exportar para arquivo .md">
+              <button onclick="downloadReportMarkdown()" class="text-xs bg-slate-100 hover:bg-slate-200 dark:bg-dark-900 dark:hover:bg-dark-800 text-slate-700 dark:text-gray-300 px-3 py-1.5 rounded-lg border border-slate-200 dark:border-gray-800 transition flex items-center gap-1.5 cursor-pointer" title="Exportar para arquivo .md">
                 <i class="fa-solid fa-download"></i> MD
               </button>
 
               <!-- Botão Imprimir / Salvar PDF -->
-              <button onclick="window.print()" class="text-xs bg-slate-100 hover:bg-slate-200 dark:bg-gray-800 dark:hover:bg-gray-700 text-slate-700 dark:text-gray-300 px-3 py-1.5 rounded transition flex items-center gap-1" title="Imprimir ou gerar PDF limpo">
+              <button onclick="window.print()" class="text-xs bg-slate-100 hover:bg-slate-200 dark:bg-dark-900 dark:hover:bg-dark-800 text-slate-700 dark:text-gray-300 px-3 py-1.5 rounded-lg border border-slate-200 dark:border-gray-800 transition flex items-center gap-1.5 cursor-pointer" title="Imprimir ou gerar PDF limpo">
                 <i class="fa-solid fa-print"></i> PDF
               </button>
             </div>
@@ -1537,6 +1530,16 @@
       applyTheme();
     }
 
+    function escapeHTML(str) {
+      if (!str) return '';
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+    }
+
     // Alternar Abas
     function enterSystem() {
       switchTab('query');
@@ -2188,10 +2191,11 @@
         document.getElementById('query-echo-text').textContent = query;
         document.getElementById('query-echo-box').classList.remove('hidden');
 
-        // Renderizar Markdown do Relatório
+        // Renderizar Markdown do Relatório com Sanitização XSS
         const reportEl = document.getElementById('report-content');
         if (typeof marked !== 'undefined' && data.report) {
-          reportEl.innerHTML = marked.parse(data.report);
+          const rawHtml = marked.parse(data.report);
+          reportEl.innerHTML = typeof DOMPurify !== 'undefined' ? DOMPurify.sanitize(rawHtml) : rawHtml;
         } else {
           reportEl.textContent = data.report || "Sem resposta.";
         }
@@ -2264,7 +2268,7 @@
           badge.classList.add('hidden');
         }
 
-        // Renderizar Chunks com Rerank Scores
+        // Renderizar Chunks com Rerank Scores e Sanitização HTML
         const chunksList = document.getElementById('chunks-list');
         document.getElementById('chunks-count').textContent = `${data.found_chunks.length} trecho(s)`;
         
@@ -2272,13 +2276,13 @@
           chunksList.innerHTML = data.found_chunks.map((c, i) => `
             <div class="bg-slate-50 dark:bg-dark-900 border border-slate-200 dark:border-gray-800 rounded-lg p-3 text-xs space-y-1.5 shadow-sm">
               <div class="flex items-center justify-between text-slate-500 dark:text-gray-400 font-semibold">
-                <span class="text-brand-600 dark:text-brand-300 flex items-center gap-1 truncate max-w-[200px]" title="${c.filename}">
-                  <i class="fa-regular fa-file-pdf"></i> ${c.filename}
+                <span class="text-brand-600 dark:text-brand-300 flex items-center gap-1 truncate max-w-[200px]" title="${escapeHTML(c.filename)}">
+                  <i class="fa-regular fa-file-pdf"></i> ${escapeHTML(c.filename)}
                 </span>
                 <span class="bg-white dark:bg-dark-850 px-2 py-0.5 rounded border border-slate-200 dark:border-gray-700 font-mono text-[11px]">Pág. ${c.page_number || 1}</span>
               </div>
               <p class="text-slate-700 dark:text-gray-300 italic border-l-2 border-brand-500/50 pl-2 leading-relaxed">
-                "${c.content}"
+                "${escapeHTML(c.content)}"
               </p>
               ${c.rerank_score ? `<div class="text-[10px] text-right font-mono text-amber-600 dark:text-amber-400 font-semibold"><i class="fa-solid fa-award"></i> FlashRank Score: ${c.rerank_score.toFixed(4)}</div>` : ''}
             </div>

@@ -362,7 +362,7 @@ class DocumentIndexer:
                                 "chunk_index": r["chunk_index"],
                                 "category": r["category"],
                                 "content": r["content"],
-                                "score": r["rank"] * score_multiplier
+                                "score": (-r["rank"]) * score_multiplier
                             })
                             if len(results) >= max_total_chunks:
                                 return True
@@ -372,11 +372,13 @@ class DocumentIndexer:
 
             for ep in exact_phrases:
                 if run_subquery(f'"{ep}"', max_take=4, score_multiplier=3.0):
-                    return results[:max_total_chunks]
+                    results.sort(key=lambda x: x["score"], reverse=True)
+            return results[:max_total_chunks]
 
             for bg in bigrams[:3]:
                 if run_subquery(f'"{bg}"', max_take=3, score_multiplier=2.5):
-                    return results[:max_total_chunks]
+                    results.sort(key=lambda x: x["score"], reverse=True)
+            return results[:max_total_chunks]
 
             if len(keywords) >= 2:
                 t1, t2 = keywords[0], keywords[1]
@@ -390,6 +392,7 @@ class DocumentIndexer:
                 or_query = " OR ".join(f'"{t}"*' for t in keywords[:4])
                 run_subquery(or_query, max_take=max_total_chunks - len(results), score_multiplier=1.0)
 
+            results.sort(key=lambda x: x["score"], reverse=True)
             return results[:max_total_chunks]
 
     def rerank_passages(self, query: str, candidate_chunks: List[Dict[str, Any]], top_k: int = 5) -> List[Dict[str, Any]]:
@@ -424,7 +427,8 @@ class DocumentIndexer:
         candidates = self.search_universal(query, max_total_chunks=20, category_filter=category_filter)
         return self.rerank_passages(query, candidates, top_k=limit)
 
-    def get_documents(self, search: str = None, category: str = None, limit: int = 1000) -> List[Dict[str, Any]]:
+    def get_documents(self, search: str = None, category: str = None, doc_type: str = None, limit: int = 1000) -> List[Dict[str, Any]]:
+        target_cat = category or doc_type
         with self._get_connection() as conn:
             cursor = conn.cursor()
             conditions = []
@@ -432,9 +436,9 @@ class DocumentIndexer:
             if search:
                 conditions.append("filename LIKE ?")
                 params.append(f"%{search.strip()}%")
-            if category and category != "all":
+            if target_cat and target_cat != "all":
                 conditions.append("category = ?")
-                params.append(category)
+                params.append(target_cat)
 
             where_clause = f"WHERE {' AND '.join(conditions)}" if conditions else ""
             sql = f"""

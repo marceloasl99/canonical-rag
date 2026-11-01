@@ -1,4 +1,5 @@
 import logging
+import asyncio
 from typing import Dict, Any, List, Optional
 from .config import AppConfig
 from .indexer import DocumentIndexer
@@ -64,12 +65,12 @@ class RAGOrchestrator:
         force_refresh: bool = False
     ) -> Dict[str, Any]:
         if not only_retrieve and not force_refresh:
-            cached = self.indexer.get_cached_response(query)
+            cached = await asyncio.to_thread(self.indexer.get_cached_response, query)
             if cached:
                 logger.info(f"[CACHE HIT]: Retornando resposta em cache para: '{query}'")
                 return cached
 
-        ranked_chunks = self.indexer.search(query, limit=limit_chunks)
+        ranked_chunks = await asyncio.to_thread(self.indexer.search, query, limit=limit_chunks)
         
         if not ranked_chunks:
             return {
@@ -147,7 +148,8 @@ class RAGOrchestrator:
         }
 
         tokens_for_cache = estimated_saved + int(len(report_text) / 4) + 1000
-        self.indexer.store_cached_response(
+        await asyncio.to_thread(
+            self.indexer.store_cached_response,
             raw_query=query,
             report=report_text,
             found_chunks=ranked_chunks,

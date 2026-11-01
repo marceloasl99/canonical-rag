@@ -33,6 +33,7 @@ class QueryRequest(BaseModel):
     limit_chunks: int = 5
     only_retrieve: bool = False
     preferred_slot_id: Optional[str] = None
+    force_refresh: bool = False
 
 class AddKeyRequest(BaseModel):
     key: str
@@ -82,11 +83,13 @@ async def get_config():
     cfg_dict = config.model_dump()
     for p in cfg_dict["providers"].values():
         for k in p["keys"]:
-            original = k["key"]
+            original = k.get("key", "")
             if len(original) > 8:
                 k["masked_key"] = f"{original[:4]}...{original[-4:]}"
             else:
                 k["masked_key"] = "***"
+            # Hard redacting raw key from response to prevent token disclosure
+            k["key"] = k["masked_key"]
     return cfg_dict
 
 @app.post("/api/settings")
@@ -269,7 +272,8 @@ async def execute_query(req: QueryRequest):
             query=req.query,
             limit_chunks=req.limit_chunks,
             only_retrieve=req.only_retrieve,
-            preferred_slot_id=req.preferred_slot_id
+            preferred_slot_id=req.preferred_slot_id,
+            force_refresh=req.force_refresh
         )
         log.info(f"<-- [QUERY CONCLUIDA]: {len(result.get('found_chunks', []))} chunks recuperados.")
         return result
