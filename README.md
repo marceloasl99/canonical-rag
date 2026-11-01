@@ -116,6 +116,7 @@ Open your browser at `http://localhost:80` (or the port defined in `$PORT`).
 
 ### 💻 Modern Web UI & Fluid Experience
 CanonicalRAG includes a clean, single-page reactive dashboard with zero heavy frontend build dependencies (Tailwind CSS CDN + FontAwesome + Google Fonts):
+- **🚀 High-Converting Landing Page:** Integrated welcome portal featuring a 4-step explanatory funnel breakdown, key metrics strip (~40MB RAM, 0 GPU), and direct "Enter System" CTA.
 - **🎨 Technical Design System:** Paired typography featuring **IBM Plex Sans** (for high-legibility documentation) and **JetBrains Mono** (for telemetry, timings, and code), tuned via UI/UX design intelligence principles.
 - **🌓 Light & Dark Themes:** Smooth palette transitions persisted in local storage with OLED deep dark mode.
 - **🌐 Bilingual Support (EN / PT):** Instant toggle between English and Portuguese for all interfaces, labels, and modals.
@@ -170,6 +171,7 @@ O **CanonicalRAG** é uma engine de **Recuperação Aumentada por Geração (RAG
 4. **Gateway Multi-LLM Resiliente:**
    - Suporte nativo a Anthropic Claude (com Prompt Caching efêmero), Google Gemini, OpenRouter (modelos gratuitos `:free`) e Cloudflare Workers AI.
 5. **Interface Web Moderna e Fluida (Design System Profissional):**
+   - **Landing Page Integrada:** Portal inicial de boas-vindas com mini passo a passo explicativo em 4 etapas, strip de métricas e botão de alta conversão para "Entrar no Sistema".
    - **Tipografia Técnica Especializada:** Combinação das fontes Google Fonts **IBM Plex Sans** (legibilidade e densidade técnica) e **JetBrains Mono** (telemetria, código e métricas).
    - **Temas Claro e Escuro (Light & Dark):** Alternância instantânea com persistência local e paleta escura profunda (OLED).
    - **Bilingue (Inglês e Português):** Suporte completo de i18n em todos os painéis, modais e notificações.
