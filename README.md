@@ -127,6 +127,25 @@ CanonicalRAG includes a single-page reactive dashboard with zero heavy frontend 
 
 ---
 
+### 🛡️ Security Hardening & Async Concurrency Architecture
+
+CanonicalRAG adheres to strict production engineering and security standards audited across 5 specialized system skills:
+
+1. **Non-Blocking Thread Offload (`asyncio.to_thread`):**
+   - Both the CPU-bound ONNX cross-encoder transformer forward pass (`ms-marco-MiniLM-L-12-v2`) and synchronous SQLite disk I/O are completely offloaded from FastAPI's main asyncio event loop into dedicated worker threads.
+   - Eliminates event-loop starvation and keeps the HTTP server 100% responsive for concurrent queries, background indexing, and real-time telemetry polling.
+2. **Zero-Trust API Key Redaction:**
+   - The `/api/config` endpoint redacts all raw credentials before serialization, returning strictly masked keys (`sk-ant-...3QAA`) to prevent credential leakage over HTTP or LAN.
+3. **Cross-Site Scripting (XSS) Sanitization:**
+   - All rendered Markdown reports are sanitized via **DOMPurify** (`DOMPurify.sanitize(marked.parse(...))`).
+   - Retrieved document chunks and filenames are passed through a strict `escapeHTML()` pipeline before DOM interpolation, mitigating OWASP LLM02 (Insecure Output Handling).
+4. **Normalized BM25 Score Ranking:**
+   - Multi-tier lexical search normalizes SQLite FTS5 rank (`(-rank) * multiplier`) and applies descending relevance sorting before candidate passage handoff to the cross-encoder.
+5. **Continuous Engineering Audit Skills:**
+   - Integrated with 5 autonomous skills in `.agents/skills/` (`rag-retrieval-audit`, `fastapi-async-resilience`, `token-cost-telemetry`, `appsec-security-review`, `spa-ux-accessibility`).
+
+---
+
 ### 🚀 Quickstart & Installation
 
 #### 1. Clone the repository
@@ -313,6 +332,12 @@ docker compose up -d --build
 
 ```
 canonical-rag/
+├── .agents/skills/         # Autonomous audit & architecture skills
+│   ├── rag-retrieval-audit/       # RAG pipeline & BM25 verification
+│   ├── fastapi-async-resilience/  # Non-blocking async event loop guards
+│   ├── token-cost-telemetry/      # Token metrics & hardware audit
+│   ├── appsec-security-review/    # OWASP LLM security & XSS defense
+│   └── spa-ux-accessibility/      # WCAG contrast & reading suite audit
 ├── backend/
 │   ├── config.py           # Pydantic schemas, validation & multi-key rotation
 │   ├── dossier_builder.py  # Universal dossier builder & sentence-level pruner
@@ -439,6 +464,23 @@ A maioria das soluções convencionais de RAG empresarial (como arquiteturas bas
 - **⚡ Telemetria Contínua:** Barra de status no cabeçalho (atualizada a cada 2s) com CPU, RAM, disco e total acumulado de economia de tokens.
 - **🔬 Simulador Interativo da Arquitetura:** Aba "Como Funciona" com teste de consulta ao vivo e análise passo a passo de pontuação.
 - **📚 Biblioteca de 283 Documentos:** Navegação instantânea com busca em tempo real, contadores e paginação.
+
+---
+
+### 🛡️ Blindagem de Segurança e Concorrência Assíncrona
+
+O CanonicalRAG foi auditado e fortalecido segundo 5 skills especializadas de engenharia:
+
+1. **Desacoplamento Assíncrono (`asyncio.to_thread`):**
+   - A inferência de CPU do cross-encoder ONNX e as operações em disco do SQLite rodam em threads trabalhadoras separadas via `asyncio.to_thread`, impedindo o congelamento do *Event Loop* do FastAPI em cargas simultâneas.
+2. **Proteção Total de Chaves de API (Zero-Trust Redaction):**
+   - O endpoint `/api/config` mascara as chaves reais antes da serialização (`sk-ant-...3QAA`), impedindo o vazamento de tokens em redes locais ou inspeções de tráfego.
+3. **Sanitização XSS com DOMPurify e Escape de Entidades:**
+   - Todos os relatórios em Markdown passam pelo **DOMPurify** antes da injeção no DOM, e todos os trechos de documentos passam por `escapeHTML()`, bloqueando vetores de injeção indireta (OWASP LLM02).
+4. **Ordenação Ponderada de Relevância FTS5:**
+   - Normalização matemática do BM25 (`(-rank) * multiplicador`) com ordenação decrescente por score real antes do envio ao reranker local.
+5. **Skills Autônomas de Auditoria Integradas:**
+   - 5 pacotes de auditoria em `.agents/skills/` cobrindo recuperação RAG, resiliência assíncrona, telemetria de tokens, segurança aplicativa e acessibilidade SPA.
 
 ---
 
