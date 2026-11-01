@@ -560,6 +560,19 @@
             <div class="flex flex-wrap items-center gap-1.5">
               <span id="llm-badge" class="text-[11px] px-2.5 py-1 rounded-lg bg-slate-100 dark:bg-dark-900 text-slate-700 dark:text-gray-300 border border-slate-200 dark:border-gray-700 font-mono"></span>
               
+              <!-- Seletor de Modo de Visualização (Completo / Contínuo / Tópicos) -->
+              <div class="flex items-center rounded-lg border border-slate-200 dark:border-gray-800 bg-slate-50 dark:bg-dark-900 p-0.5 text-xs font-medium">
+                <button id="btn-view-all" onclick="setReportViewMode('all')" class="px-2.5 py-1 rounded-md bg-brand-600 text-white font-semibold transition cursor-pointer shadow-sm" title="Exibir síntese contínua e tópicos juntos">
+                  <i class="fa-solid fa-layer-group text-[10px] mr-1"></i> <span data-i18n="viewAll">Completo</span>
+                </button>
+                <button id="btn-view-continuous" onclick="setReportViewMode('continuous')" class="px-2.5 py-1 rounded-md text-slate-600 dark:text-gray-400 hover:text-brand-600 dark:hover:text-white transition cursor-pointer" title="Exibir apenas a síntese contínua (início, meio e fim)">
+                  <i class="fa-solid fa-paragraph text-[10px] mr-1"></i> <span data-i18n="viewContinuous">Contínuo</span>
+                </button>
+                <button id="btn-view-topics" onclick="setReportViewMode('topics')" class="px-2.5 py-1 rounded-md text-slate-600 dark:text-gray-400 hover:text-brand-600 dark:hover:text-white transition cursor-pointer" title="Exibir apenas a análise estruturada em tópicos">
+                  <i class="fa-solid fa-list-check text-[10px] mr-1"></i> <span data-i18n="viewTopics">Tópicos</span>
+                </button>
+              </div>
+
               <!-- Ajuste de Tamanho da Fonte (A- / A+) -->
               <div class="flex items-center rounded-lg border border-slate-200 dark:border-gray-800 bg-slate-50 dark:bg-dark-900 p-0.5 text-xs font-mono">
                 <button onclick="adjustReportFontSize(-1)" class="px-2 py-0.5 rounded text-slate-600 dark:text-gray-400 hover:text-brand-600 dark:hover:text-white transition cursor-pointer" title="Diminuir fonte">
@@ -1213,6 +1226,67 @@
     let isSourcesHidden = false;
     let currentLang = localStorage.getItem('canonical_lang') || 'pt';
     let currentTheme = localStorage.getItem('canonical_theme') || 'dark';
+    let currentReportViewMode = 'all'; // 'all', 'continuous', 'topics'
+
+    // FILTRO E RENDERIZAÇÃO DE RELATÓRIO EM DUAS SEÇÕES INDEPENDENTES
+    function filterReportByMode(rawText, mode) {
+      if (!rawText || mode === 'all') return rawText;
+
+      // Extrair preâmbulo/cabeçalho se existir (antes de ## 1. ou ## 2.)
+      const preMatch = rawText.match(/^([\s\S]*?)(?=\n## [12]\.)/);
+      let preamble = preMatch ? preMatch[1].trim() : '';
+      if (preamble && !preamble.endsWith('---')) {
+        preamble += '\n\n---\n\n';
+      } else if (preamble) {
+        preamble += '\n\n';
+      }
+
+      // Extrair Seção 3 (Extratos fontes) se existir no final
+      const s3Match = rawText.match(/\n(## 3\..*)$/s);
+      const section3 = s3Match ? '\n\n---\n\n' + s3Match[1] : '';
+
+      if (mode === 'continuous') {
+        const s1 = rawText.match(/(## 1\..*?)(?=\n\s*---\s*\n## 2\.|\n## 2\.|$)/s);
+        if (s1) {
+          return preamble + s1[1].trim() + section3;
+        }
+      } else if (mode === 'topics') {
+        const s2 = rawText.match(/(## 2\..*?)(?=\n\s*---\s*\n## 3\.|\n## 3\.|$)/s);
+        if (s2) {
+          return preamble + s2[1].trim() + section3;
+        }
+      }
+      return rawText;
+    }
+
+    function renderCurrentReport() {
+      const reportEl = document.getElementById('report-content');
+      if (!reportEl) return;
+      const textToDisplay = filterReportByMode(currentRawReport, currentReportViewMode);
+      if (typeof marked !== 'undefined' && textToDisplay) {
+        const rawHtml = marked.parse(textToDisplay);
+        reportEl.innerHTML = typeof DOMPurify !== 'undefined' ? DOMPurify.sanitize(rawHtml) : rawHtml;
+      } else {
+        reportEl.textContent = textToDisplay || "Sem resposta.";
+      }
+      updateReportWordCount(textToDisplay || "");
+      updateReadingProgress();
+    }
+
+    function setReportViewMode(mode) {
+      currentReportViewMode = mode;
+      const modes = ['all', 'continuous', 'topics'];
+      modes.forEach(m => {
+        const btn = document.getElementById(`btn-view-${m}`);
+        if (!btn) return;
+        if (m === mode) {
+          btn.className = "px-2.5 py-1 rounded-md bg-brand-600 text-white font-semibold transition cursor-pointer shadow-sm";
+        } else {
+          btn.className = "px-2.5 py-1 rounded-md text-slate-600 dark:text-gray-400 hover:text-brand-600 dark:hover:text-white transition cursor-pointer";
+        }
+      });
+      renderCurrentReport();
+    }
 
     // Dicionário de Internacionalização (PT / EN)
     const translations = {
@@ -1222,6 +1296,9 @@
         tabDocs: "Acervo",
         tabKeys: "Modelos & Chaves",
         tabArch: "Como Funciona",
+        viewAll: "Completo",
+        viewContinuous: "Contínuo",
+        viewTopics: "Tópicos",
         promptLabel: "Pergunta ou Texto a ser Respondido e Analisado",
         promptPlaceholder: "Digite sua pergunta técnica ou cole o texto a ser analisado com base no acervo canônico...",
         btnSend: "Enviar para LLM",
@@ -1362,6 +1439,9 @@
         tabDocs: "Library",
         tabKeys: "Models & Keys",
         tabArch: "Architecture",
+        viewAll: "Full",
+        viewContinuous: "Continuous",
+        viewTopics: "Topics",
         promptLabel: "Technical Question or Text to Analyze",
         promptPlaceholder: "Enter your technical question or paste text to analyze against the canonical literature...",
         btnSend: "Send to LLM",
@@ -1642,13 +1722,15 @@
 
     // Exportar Relatório para Arquivo Markdown (.md)
     function downloadReportMarkdown() {
-      if (!currentRawReport) { const t = translations[currentLang]; return showToast(t.toastNoReportTitle, t.toastNoReportDesc, "warning"); }
-      const blob = new Blob([currentRawReport], { type: 'text/markdown;charset=utf-8;' });
+      const textToDownload = filterReportByMode(currentRawReport, currentReportViewMode) || currentRawReport;
+      if (!textToDownload) { const t = translations[currentLang]; return showToast(t.toastNoReportTitle, t.toastNoReportDesc, "warning"); }
+      const blob = new Blob([textToDownload], { type: 'text/markdown;charset=utf-8;' });
       const url = URL.createObjectURL(blob);
       const link = document.createElement("a");
       const safeTitle = (currentQuery || "relatorio_canonico").substring(0, 30).replace(/[^a-zA-Z0-9]/g, "_");
+      const modeSuffix = currentReportViewMode === 'continuous' ? '_continuo' : (currentReportViewMode === 'topics' ? '_topicos' : '_completo');
       link.setAttribute("href", url);
-      link.setAttribute("download", `${safeTitle}.md`);
+      link.setAttribute("download", `${safeTitle}${modeSuffix}.md`);
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
@@ -2191,20 +2273,13 @@
         document.getElementById('query-echo-text').textContent = query;
         document.getElementById('query-echo-box').classList.remove('hidden');
 
-        // Renderizar Markdown do Relatório com Sanitização XSS
+        // Renderizar Markdown do Relatório com Sanitização XSS e Suporte a Visualizações
+        renderCurrentReport();
         const reportEl = document.getElementById('report-content');
-        if (typeof marked !== 'undefined' && data.report) {
-          const rawHtml = marked.parse(data.report);
-          reportEl.innerHTML = typeof DOMPurify !== 'undefined' ? DOMPurify.sanitize(rawHtml) : rawHtml;
-        } else {
-          reportEl.textContent = data.report || "Sem resposta.";
+        if (reportEl) {
+          reportEl.removeEventListener('scroll', updateReadingProgress);
+          reportEl.addEventListener('scroll', updateReadingProgress);
         }
-        
-        // Atualizar métricas de leitura e progresso
-        updateReportWordCount(data.report || "");
-        updateReadingProgress();
-        reportEl.removeEventListener('scroll', updateReadingProgress);
-        reportEl.addEventListener('scroll', updateReadingProgress);
 
         // Notificação Toast
         const tr = translations[currentLang];
@@ -2308,9 +2383,11 @@
     }
 
     function copyReport() {
-      const text = document.getElementById('report-content').textContent;
-      navigator.clipboard.writeText(text);
-      alert(translations[currentLang].copiedAlert);
+      const textToCopy = filterReportByMode(currentRawReport, currentReportViewMode) || (document.getElementById('report-content') ? document.getElementById('report-content').textContent : '');
+      if (!textToCopy) { const t = translations[currentLang]; return showToast(t.toastNoReportTitle, t.toastNoReportDesc, "warning"); }
+      navigator.clipboard.writeText(textToCopy);
+      const t = translations[currentLang];
+      showToast(t.copy || "Copiado", t.copiedAlert, "success");
     }
 
     // Telemetria do Sistema a cada 2 segundos

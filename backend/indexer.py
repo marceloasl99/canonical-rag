@@ -373,12 +373,12 @@ class DocumentIndexer:
             for ep in exact_phrases:
                 if run_subquery(f'"{ep}"', max_take=4, score_multiplier=3.0):
                     results.sort(key=lambda x: x["score"], reverse=True)
-            return results[:max_total_chunks]
+                    return results[:max_total_chunks]
 
             for bg in bigrams[:3]:
                 if run_subquery(f'"{bg}"', max_take=3, score_multiplier=2.5):
                     results.sort(key=lambda x: x["score"], reverse=True)
-            return results[:max_total_chunks]
+                    return results[:max_total_chunks]
 
             if len(keywords) >= 2:
                 t1, t2 = keywords[0], keywords[1]

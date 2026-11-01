@@ -114,6 +114,10 @@ CanonicalRAG includes a single-page reactive dashboard with zero heavy frontend 
 - **🌓 Light & Dark Themes:** Smooth palette transitions persisted in `localStorage` with OLED deep dark mode (`#070a13`) and crisp high-contrast light mode.
 - **🌐 Bilingual Support (EN / PT):** Instant toggle between English and Portuguese for all interfaces, labels, modals, and telemetry stats.
 - **⚡ Asynchronous Skeleton Pipeline Tracker:** Stepped 5-stage visual progress tracker during query generation (0 frozen screen time).
+- **📑 Dual Independent Report Delivery & 3-Way Reading Mode Toggle:**
+  - **1. Continuous Narrative Synthesis (`Início, Meio e Fim`):** Cohesive, fluent dissertation with pedagogical introduction, deductive body with natural Portuguese technical connectives, and conclusive closure.
+  - **2. Structured Topic Breakdown:** Bulleted analytical breakdown (`📌 Core Concept & Direct Answer`, `⚙️ Mechanisms & Technical Grounding`, `💡 Variables, Conditions & Nuances`, `🎯 Practical Guideline & Executive Action`).
+  - **Instant 3-Way Switcher:** Toggle instantaneously between **Full Report** (`Completo`), **Continuous Synthesis Only** (`Contínuo`), and **Structured Topics Only** (`Tópicos`) without re-querying or consuming extra tokens.
 - **📖 Fluid Reading Suite:**
   - **Hide Sources Toggle:** Expand the executive report to 100% full-width with a single click.
   - **Dynamic Reading Progress Bar:** Real-time scroll indicator at the top of the reading pane.
@@ -454,6 +458,10 @@ A maioria das soluções convencionais de RAG empresarial (como arquiteturas bas
 - **🌓 Temas Claro e Escuro:** Alternância instantânea com persistência local em `localStorage`, modo OLED profundo (`#070a13`) e tema claro de alto contraste.
 - **🌐 Bilingue (Português / Inglês):** Alternância instantânea de idioma em toda a interface, modais e telemetria.
 - **⚡ Rastreador Visual de Pipeline (Skeleton Stepper):** Indicador visual de progresso em 5 etapas durante a geração, eliminando telas congeladas.
+- **📑 Relatório Técnico Dual & Alternador de Visualização em 3 Modos:**
+  - **1. Síntese Técnica Contínua (`Início, Meio e Fim`):** Dissertação coesa e articulada com introdução didática, desenvolvimento aprofundado com conectivos de causa/efeito em português e conclusão técnica definitiva.
+  - **2. Análise Estruturada em Tópicos:** Decomposição analítica em marcadores objetivos (`📌 Conceito Central & Resposta Direta`, `⚙️ Mecanismos & Fundamentação Técnica`, `💡 Variáveis, Condições e Pontos de Atenção`, `🎯 Diretriz Prática & Conclusão Executiva`).
+  - **Alternador Instantâneo:** Troca dinâmica e em tempo real entre visualização **Completa**, **Apenas Contínua** ou **Apenas Tópicos** sem nova requisição à rede e com 0 tokens adicionais.
 - **📖 Suíte de Leitura Fluida:**
   - **Ocultar Fontes:** Expansão do relatório técnico para 100% de largura da tela.
   - **Barra de Progresso de Leitura:** Indicador dinâmico de rolagem no topo da leitura.

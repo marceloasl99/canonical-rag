@@ -11,21 +11,28 @@ logger = logging.getLogger("RAGOrchestrator")
 SYSTEM_PROMPT_CANONICAL = """Você é um especialista e redator de elite especializado em síntese técnica e fidelidade documental no idioma {language}.
 Sua missão é responder com máxima clareza didática, precisão conceitual e rigor metodológico à PERGUNTA OU TEXTO apresentado, fundamentando a resposta EXCLUSIVAMENTE nos extratos canônicos fornecidos.
 
-DIRETRIZES FUNDAMENTAIS:
-1. RESPOSTA EXATA AO SOLICITADO:
-   - Responda pontualmente ao que foi perguntado, cobrindo integralmente as variáveis e os requisitos da dúvida.
+ESTRUTURA MANDATÓRIA DA RESPOSTA (DUAS SEÇÕES INDEPENDENTES):
+Sua resposta DEVE ser rigorosamente estruturada em duas seções principais independentes:
 
-2. DIDÁTICA E DISCRIMINAÇÃO TÉCNICA:
-   - Decomponha cada componente, premissa ou conceito mencionado.
-   - Destaque dependências estruturais, fórmulas, restrições e regras aplicáveis contidas nos textos de apoio.
+## 1. Síntese Técnica Contínua (Início, Meio e Fim)
+- Redija uma dissertação coesa, fluida e articulada em parágrafos contínuos.
+- INÍCIO: Introdução didática que contextualiza a dúvida, define o tema e estabelece a premissa de partida.
+- MEIO: Desenvolvimento aprofundado encadeando logicamente os extratos canônicos, demonstrando causas, efeitos e dependências estruturais com conectivos naturais em português.
+- FIM: Conclusão consistente que amarra a análise e apresenta a síntese definitiva.
 
-3. FIDELIDADE AO VIÉS E À NATUREZA DOS DOCUMENTOS:
-   - Adote o vocabulário, o rigor e a metodologia das obras e documentos presentes no dossiê de apoio.
-   - Não invente fatos ou regras externas que não estejam respaldadas pela documentação.
+---
 
-4. SEM CITAÇÕES BIBLIOGRÁFICAS OU METADADOS (REGRA ABSOLUTA):
-   - Jamais mencione nomes de arquivos (ex: .pdf, .txt), autores, títulos de livros ou números de páginas no texto final.
-   - Redija a análise diretamente para o leitor com voz própria de autoridade técnica."""
+## 2. Análise Estruturada em Tópicos
+- Apresente a mesma fundamentação decomposta em tópicos analíticos claros e objetivos:
+  - **📌 Conceito Central & Resposta Direta:** resposta direta e pontual.
+  - **⚙️ Mecanismos & Fundamentação Técnica:** como atua, regras essenciais e dinâmicas conceituais dos extratos.
+  - **💡 Variáveis, Condições e Pontos de Atenção:** fatores críticos, restrições e dependências de contexto.
+  - **🎯 Diretriz Prática & Conclusão Executiva:** síntese executiva e aplicação concreta.
+
+DIRETRIZES DE OURO:
+1. RESPOSTA EXATA: Cubra com rigor todos os componentes citados na pergunta.
+2. FIDELIDADE AOS DOCUMENTOS: Adote o vocabulário e rigor dos textos canônicos, sem alucinar fatos não documentados.
+3. SEM CITAÇÕES BIBLIOGRÁFICAS OU METADADOS (REGRA ABSOLUTA): Jamais mencione nomes de arquivos (ex: .pdf, .txt), autores, títulos de livros ou páginas. Redija com autoridade própria direta para o leitor."""
 
 class RAGOrchestrator:
     def __init__(self, config: AppConfig, indexer: DocumentIndexer, gateway: LLMGateway):
@@ -39,22 +46,12 @@ class RAGOrchestrator:
         self.gateway.update_config(config)
 
     def format_direct_dossier_report(self, query: str, dossier: Dict[str, Any]) -> str:
-        items = dossier["items"]
-        lines = [
-            f"# Dossiê Técnico Estruturado\n",
-            f"> **Consulta:** {query}  ",
-            f"> **Modo:** Processamento Local (Mini-LLM FlashRank Cross-Encoder + Poda Extrativa | 0 Tokens Externos)\n\n---\n"
-        ]
-
-        lines.append("## 1. Princípios e Fundamentos Canônicos (Extratos Reranqueados)\n")
-        for it in items:
-            page_txt = f" (pág. {it['page']})" if it.get("page") else ""
-            lines.append(f"### Extrato [{it['index']}] — *{it['source']}{page_txt}*\n")
-            lines.append(f"{it['content']}\n")
-            lines.append("---\n")
-
-        lines.append("\n*Dossiê compilado via recuperação em duas etapas (SQLite FTS5 + Mini-LLM FlashRank).*")
-        return "\n".join(lines)
+        """
+        Formata o Dossiê Técnico Estruturado com DUAS SEÇÕES INDEPENDENTES
+        (1. Síntese Contínua com início, meio e fim; 2. Análise Estruturada em Tópicos)
+        diretamente pelo motor com ZERO tokens de LLM.
+        """
+        return self.dossier_builder.format_dual_report(query, dossier)
 
     async def query_and_draft_report(
         self,
@@ -124,11 +121,14 @@ class RAGOrchestrator:
 ### DOCUMENTAÇÃO CANÔNICA DE APOIO (RERANQUEADA VIA CROSS-ENCODER):
 {canonical_context}
 
-### DIRETRIZES OBRIGATÓRIAS DE REDAÇÃO:
-1. Responda DIRETAMENTE ao que foi solicitado, decompondo os componentes essenciais com clareza didática.
-2. Fundamente rigorosamente as asserções nos extratos canônicos acima, preservando a exatidão conceitual dos documentos.
-3. Não cite nomes de obras, arquivos (.pdf/.txt), autores ou páginas.
-4. Redija de forma fluida e definitiva para o leitor."""
+### DIRETRIZES OBRIGATÓRIAS DE REDAÇÃO (DUAS SEÇÕES INDEPENDENTES):
+1. Sua resposta DEVE conter rigorosamente as duas seções:
+   - '## 1. Síntese Técnica Contínua (Início, Meio e Fim)': texto dissertativo contínuo, iniciando com introdução didática que contextualiza a dúvida, desenvolvimento aprofundado encadeando causas e efeitos com conectivos fluídos em português, e conclusão técnica definitiva.
+   - '## 2. Análise Estruturada em Tópicos': decomposição analítica em marcadores objetivos (📌 Conceito Central & Resposta Direta, ⚙️ Mecanismos & Fundamentação Técnica, 💡 Variáveis, Condições e Pontos de Atenção, 🎯 Diretriz Prática & Conclusão Executiva).
+2. Responda DIRETAMENTE ao que foi solicitado, decompondo os componentes essenciais com clareza didática.
+3. Fundamente rigorosamente as asserções nos extratos canônicos acima, preservando a exatidão conceitual dos documentos.
+4. Jamais cite nomes de obras, arquivos (.pdf/.txt), autores ou páginas.
+5. Redija de forma fluida e definitiva para o leitor."""
 
         llm_response = await self.gateway.generate_completion(
             system_prompt=system_prompt,
