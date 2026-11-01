@@ -1861,16 +1861,41 @@
           throw new Error(data.detail || "Erro na consulta");
         }
 
+        // Ocultar Skeleton e Exibir Conteúdo Real
+        if (skeletonTimer) clearInterval(skeletonTimer);
+        const skEl = document.getElementById('results-skeleton');
+        if (skEl) skEl.classList.add('hidden');
+
+        const repCol = document.getElementById('report-column');
+        if (repCol) repCol.classList.remove('hidden');
+        const chkCol = document.getElementById('chunks-column');
+        if (chkCol && !isSourcesHidden) chkCol.classList.remove('hidden');
+
         currentRawReport = data.report || "";
         document.getElementById('results-area').classList.remove('hidden');
         document.getElementById('query-echo-text').textContent = query;
         document.getElementById('query-echo-box').classList.remove('hidden');
 
         // Renderizar Markdown do Relatório
+        const reportEl = document.getElementById('report-content');
         if (typeof marked !== 'undefined' && data.report) {
-          document.getElementById('report-content').innerHTML = marked.parse(data.report);
+          reportEl.innerHTML = marked.parse(data.report);
         } else {
-          document.getElementById('report-content').textContent = data.report;
+          reportEl.textContent = data.report || "Sem resposta.";
+        }
+        
+        // Atualizar métricas de leitura e progresso
+        updateReportWordCount(data.report || "");
+        updateReadingProgress();
+        reportEl.removeEventListener('scroll', updateReadingProgress);
+        reportEl.addEventListener('scroll', updateReadingProgress);
+
+        // Notificação Toast
+        const tr = translations[currentLang];
+        if (data.from_cache) {
+          showToast(tr.toastCacheHitGen || "Cache Hit!", `Latência: < 10ms • ${data.tokens_saved || 0} tokens economizados`, "info");
+        } else {
+          showToast(tr.toastSuccessGen || "Relatório concluído!", `Economia de ${data.tokens_saved || 0} tokens com Poda Extrativa`, "success");
         }
 
         // Cache Pill
@@ -1954,7 +1979,12 @@
         generateRelatedQueries(query);
 
       } catch (err) {
-        alert("Erro ao executar consulta: " + err.message);
+        if (skeletonTimer) clearInterval(skeletonTimer);
+        const skEl = document.getElementById('results-skeleton');
+        if (skEl) skEl.classList.add('hidden');
+        const repCol = document.getElementById('report-column');
+        if (repCol) repCol.classList.remove('hidden');
+        showToast(translations[currentLang].toastErrorGen || "Erro ao executar consulta:", err.message, "error");
       } finally {
         btn.innerHTML = '<i class="fa-solid fa-paper-plane"></i> <span>' + translations[currentLang].btnSend + '</span>';
         btn.disabled = false;
