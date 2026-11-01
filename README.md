@@ -11,10 +11,6 @@
 >
 > By orchestrating **native SQLite FTS5 lexical retrieval**, an in-process **Mini-LLM Cross-Encoder via ONNX on CPU**, **extractive sentence-level context pruning**, and persistent semantic caching, CanonicalRAG cuts external LLM API token costs by **70% to 100%** while eliminating hallucinations.
 
-<p align="center">
-  <img src="docs/screenshots/01_landing_hero.png" alt="CanonicalRAG Landing Page Hero" width="100%" />
-</p>
-
 ---
 
 *Read this document in [English](#english-overview) or [Português](#versão-em-português).*
@@ -32,25 +28,6 @@ Most enterprise RAG frameworks (such as heavy LangChain/LlamaIndex setups) suffe
 **CanonicalRAG solves this with a lightweight funnel architecture:**
 - **Zero-GPU & Minimal Footprint:** The entire pipeline runs in under 100 MB of RAM on a standard CPU.
 - **Surgical Precision:** Retrieves broad candidates via SQLite FTS5 BM25, re-scores them using an embedded ONNX cross-encoder, prunes irrelevant sentences, and only feeds dense, high-signal excerpts to the LLM.
-
----
-
-### 📸 Visual UI Showcase
-
-| 🚀 Landing Page & 4-Step Funnel (Dark Mode) | 💡 Query Dashboard & Grounded Synthesis |
-| :---: | :---: |
-| <img src="docs/screenshots/01_landing_hero.png" width="100%" alt="Landing Page Hero" /> | <img src="docs/screenshots/02_query_report.png" width="100%" alt="Query Dashboard & Synthesis" /> |
-| *Hero portal with live hardware KPIs and 4-step funnel* | *Executive engineering report, reading suite & collapsible sources* |
-
-| 🔬 Architecture & Pipeline Simulator | ☀️ Technical Design System (Light Mode) |
-| :---: | :---: |
-| <img src="docs/screenshots/03_architecture_pipeline.png" width="100%" alt="Architecture Simulator" /> | <img src="docs/screenshots/04_landing_light.png" width="100%" alt="Light Theme" /> |
-| *5-stage visual funnel, telemetry and live interactive simulator* | *High-contrast light mode, IBM Plex Sans & JetBrains Mono* |
-
-| 📚 283 Indexed Technical Documents Library |
-| :---: |
-| <img src="docs/screenshots/05_document_library.png" width="100%" alt="Indexed Document Library" /> |
-| *Instant searchable catalog with live category filtering, document counts and pagination* |
 
 ---
 
@@ -169,8 +146,7 @@ canonical-rag/
 ├── docs/
 │   ├── ARCHITECTURE.md     # In-depth technical breakdown
 │   ├── API_REFERENCE.md    # REST API documentation & JSON payloads
-│   ├── DEPLOYMENT.md       # Production guide (Systemd, Nginx SSL, Docker)
-│   └── screenshots/        # High-resolution retina screenshots of UI
+│   └── DEPLOYMENT.md       # Production guide (Systemd, Nginx SSL, Docker)
 ├── config.example.json     # Configuration template
 ├── requirements.txt        # Lean dependencies
 └── README.md
@@ -183,25 +159,6 @@ canonical-rag/
 
 ### 💡 Por que o CanonicalRAG?
 O **CanonicalRAG** é uma engine de **Recuperação Aumentada por Geração (RAG) em Duas Etapas** de ultra-baixo consumo (~40 MB RAM em repouso), desenvolvida para operar com **fidelidade estrita a documentos técnicos** (Engenharia, Direito, Medicina, TI e Literatura Científica).
-
----
-
-### 📸 Capturas de Tela da Interface
-
-| 🚀 Landing Page e Funil Explicativo (Modo Escuro) | 💡 Painel de Consulta e Relatório Factual |
-| :---: | :---: |
-| <img src="docs/screenshots/01_landing_hero.png" width="100%" alt="Landing Page Hero" /> | <img src="docs/screenshots/02_query_report.png" width="100%" alt="Painel de Consulta" /> |
-| *Portal inicial com métricas de hardware e funil em 4 etapas* | *Relatório executivo, suíte de leitura e fontes retráteis* |
-
-| 🔬 Simulador Interativo da Arquitetura | ☀️ Modo Claro e Tipografia Técnica |
-| :---: | :---: |
-| <img src="docs/screenshots/03_architecture_pipeline.png" width="100%" alt="Simulador de Arquitetura" /> | <img src="docs/screenshots/04_landing_light.png" width="100%" alt="Modo Claro" /> |
-| *Funil visual de 5 etapas, telemetria e teste de query ao vivo* | *Tema claro de alto contraste (IBM Plex Sans + JetBrains Mono)* |
-
-| 📚 Biblioteca de 283 Documentos Indexados |
-| :---: |
-| <img src="docs/screenshots/05_document_library.png" width="100%" alt="Biblioteca de Documentos" /> |
-| *Catálogo pesquisável instantâneo com filtros por categoria e paginação* |
 
 ---
 
