@@ -115,10 +115,13 @@ Open your browser at `http://localhost:80` (or the port defined in `$PORT`).
 ---
 
 ### 💻 Modern Web UI & Fluid Experience
-CanonicalRAG includes a clean, single-page reactive dashboard with zero heavy frontend build dependencies (Tailwind CSS CDN + FontAwesome):
-- **🌓 Light & Dark Themes:** Smooth palette transitions persisted in local storage.
+CanonicalRAG includes a clean, single-page reactive dashboard with zero heavy frontend build dependencies (Tailwind CSS CDN + FontAwesome + Google Fonts):
+- **🎨 Technical Design System:** Paired typography featuring **IBM Plex Sans** (for high-legibility documentation) and **JetBrains Mono** (for telemetry, timings, and code), tuned via UI/UX design intelligence principles.
+- **🌓 Light & Dark Themes:** Smooth palette transitions persisted in local storage with OLED deep dark mode.
 - **🌐 Bilingual Support (EN / PT):** Instant toggle between English and Portuguese for all interfaces, labels, and modals.
-- **📖 Distraction-Free Technical Reports:** One-click "Hide Sources" toggle expanding the technical report to full width for fluid reading.
+- **⚡ Asynchronous Skeleton Pipeline Tracker:** Stepped 5-stage visual progress tracker during generation (0 frozen screen time).
+- **📖 Fluid Reading Suite:** One-click "Hide Sources" toggle expanding reports to 100% width, dynamic reading progress bar, word count/reading time estimations, and font size scaling (`A-` / `A+`).
+- **🔔 Toast Notification System:** Non-intrusive floating feedback stack replacing native browser alerts.
 - **📑 Automated Report Export:** Download structured reports as clean Markdown (`.md`) or print to PDF with print-optimized styling that strips telemetry and query controls.
 - **💡 Contextual Related Queries:** Dynamic generation of suggested follow-up queries based on analyzed technical keywords.
 - **⚡ Compact Real-Time Telemetry:** Continuous header telemetry (2s poll) displaying live CPU load, RAM usage, disk storage, and cumulative token savings.
@@ -166,13 +169,16 @@ O **CanonicalRAG** é uma engine de **Recuperação Aumentada por Geração (RAG
    - Consultas com o mesmo sentido semântico são normalizadas e respondem em **< 10ms com zero chamadas de API**.
 4. **Gateway Multi-LLM Resiliente:**
    - Suporte nativo a Anthropic Claude (com Prompt Caching efêmero), Google Gemini, OpenRouter (modelos gratuitos `:free`) e Cloudflare Workers AI.
-5. **Interface Web Moderna e Fluida:**
-   - **Temas Claro e Escuro (Light & Dark):** Alternância instantânea com persistência local.
-   - **Bilingue (Inglês e Português):** Suporte completo de i18n em todos os painéis e abas.
-   - **Leitura Fluida & Focada:** Botão de "Ocultar Fontes" para expandir o relatório técnico em tela cheia (100% de largura).
+5. **Interface Web Moderna e Fluida (Design System Profissional):**
+   - **Tipografia Técnica Especializada:** Combinação das fontes Google Fonts **IBM Plex Sans** (legibilidade e densidade técnica) e **JetBrains Mono** (telemetria, código e métricas).
+   - **Temas Claro e Escuro (Light & Dark):** Alternância instantânea com persistência local e paleta escura profunda (OLED).
+   - **Bilingue (Inglês e Português):** Suporte completo de i18n em todos os painéis, modais e notificações.
+   - **Rastreador Visual de Pipeline (Skeleton Stepper):** Feedback assíncrono em 5 etapas durante a geração, eliminando telas congeladas.
+   - **Suíte de Leitura Fluida:** Botão de "Ocultar Fontes" (relatório em tela cheia), barra de progresso de leitura, estimativa de tempo e palavras, e ajuste de tamanho de fonte (`A-` e `A+`).
+   - **Sistema Flutuante de Toasts:** Notificações modernas e não intrusivas substituindo pop-ups nativos do navegador.
    - **Exportação Automatizada:** Download imediato em Markdown (`.md`) e impressão limpa / PDF sem barras de controle ou menus.
    - **Consultas Relacionadas Sugeridas:** Sugestões contextuais automáticas baseadas nos termos pesquisados.
-   - **Barra de Telemetria Ultracompacta:** Monitoramento contínuo em tempo real (CPU, RAM, Disco e Economia de Tokens).
+   - **Barra de Telemetria Ultracompacta:** Monitoramento contínuo em tempo real (CPU, RAM, Disco e Economia de Tokens) com indicador de status ao vivo.
    - **Painel Interativo de Arquitetura & Simulador:** Seção detalhada "Como Funciona" com o funil visual em 5 etapas, comparativo lado a lado contra bancos vetoriais pesados e simulador interativo de pipeline em tempo real.
 
 ---

@@ -4,43 +4,102 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>CanonicalRAG — Two-Stage Universal RAG Engine</title>
+  
+  <!-- Google Fonts: IBM Plex Sans & JetBrains Mono (Design System Typography) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
   <script>
     tailwind.config = {
       darkMode: 'class',
       theme: {
         extend: {
+          fontFamily: {
+            sans: ['"IBM Plex Sans"', 'ui-sans-serif', 'system-ui', 'sans-serif'],
+            mono: ['"JetBrains Mono"', 'ui-monospace', 'monospace']
+          },
           colors: {
-            brand: { 50: '#f5f3ff', 500: '#8b5cf6', 600: '#7c3aed', 700: '#6d28d9', 900: '#4c1d95' },
-            dark: { 800: '#1e1e2d', 850: '#161623', 900: '#0f0f17' }
+            brand: {
+              50: '#f5f3ff', 100: '#ede9fe', 200: '#ddd6fe', 300: '#c4b5fd',
+              400: '#a78bfa', 500: '#8b5cf6', 600: '#7c3aed', 700: '#6d28d9',
+              800: '#5b21b6', 900: '#4c1d95', 950: '#2e1065'
+            },
+            dark: {
+              700: '#1e293b',
+              750: '#151e2e',
+              800: '#101726',
+              850: '#0c1220',
+              900: '#080d18',
+              950: '#050810'
+            }
           }
         }
       }
     }
   </script>
+  
   <style>
-    /* Transição suave entre temas claro e escuro */
-    html, body { transition: background-color 0.2s ease, color 0.2s ease; font-family: ui-sans-serif, system-ui, sans-serif; }
+    /* Transições suaves e renderização tipográfica precisa */
+    html, body {
+      transition: background-color 0.25s ease, color 0.25s ease;
+      font-family: 'IBM Plex Sans', ui-sans-serif, system-ui, sans-serif;
+      text-rendering: optimizeLegibility;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
     
-    .tab-btn.active { border-bottom: 2px solid #8b5cf6; color: #8b5cf6; font-weight: 600; }
+    .font-mono {
+      font-family: 'JetBrains Mono', ui-monospace, monospace;
+    }
+    
+    /* Scrollbars customizadas modernas e discretas */
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: rgba(148, 163, 184, 0.25); border-radius: 9999px; }
+    ::-webkit-scrollbar-thumb:hover { background: rgba(139, 92, 246, 0.45); }
+
+    .tab-btn {
+      position: relative;
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .tab-btn.active {
+      color: #8b5cf6;
+      font-weight: 600;
+    }
+    .tab-btn.active::after {
+      content: '';
+      position: absolute;
+      bottom: -2px;
+      left: 0;
+      right: 0;
+      height: 2px;
+      background: linear-gradient(90deg, #8b5cf6, #a78bfa);
+      border-radius: 9999px;
+    }
     
     /* Markdown Styles no Relatório */
-    #report-content h1 { font-size: 1.35rem; font-weight: 700; margin-top: 1.2rem; margin-bottom: 0.6rem; }
-    #report-content h2 { font-size: 1.15rem; font-weight: 600; color: #8b5cf6; margin-top: 1rem; margin-bottom: 0.5rem; }
-    #report-content h3 { font-size: 1rem; font-weight: 600; margin-top: 0.8rem; margin-bottom: 0.4rem; }
-    #report-content p { margin-bottom: 0.85rem; line-height: 1.65; }
-    #report-content ul { list-style-type: disc; margin-left: 1.35rem; margin-bottom: 0.85rem; }
-    #report-content ol { list-style-type: decimal; margin-left: 1.35rem; margin-bottom: 0.85rem; }
-    #report-content li { margin-bottom: 0.35rem; }
-    #report-content blockquote { border-left: 3px solid #8b5cf6; padding-left: 0.75rem; font-style: italic; margin-bottom: 0.85rem; }
-    #report-content pre { background: rgba(0,0,0,0.15); padding: 0.75rem; border-radius: 0.5rem; overflow-x: auto; margin-bottom: 0.85rem; font-size: 0.8rem; }
-    #report-content code { background: rgba(139, 92, 246, 0.15); padding: 0.15rem 0.35rem; border-radius: 0.25rem; font-size: 0.85em; font-family: ui-monospace, monospace; }
+    #report-content h1 { font-size: 1.4rem; font-weight: 700; margin-top: 1.3rem; margin-bottom: 0.6rem; letter-spacing: -0.02em; }
+    #report-content h2 { font-size: 1.2rem; font-weight: 600; color: #8b5cf6; margin-top: 1.1rem; margin-bottom: 0.5rem; letter-spacing: -0.01em; }
+    #report-content h3 { font-size: 1.05rem; font-weight: 600; margin-top: 0.9rem; margin-bottom: 0.4rem; }
+    #report-content p { margin-bottom: 0.9rem; line-height: 1.7; }
+    #report-content ul { list-style-type: disc; margin-left: 1.4rem; margin-bottom: 0.9rem; }
+    #report-content ol { list-style-type: decimal; margin-left: 1.4rem; margin-bottom: 0.9rem; }
+    #report-content li { margin-bottom: 0.4rem; line-height: 1.65; }
+    #report-content blockquote { border-left: 3px solid #8b5cf6; padding: 0.4rem 0 0.4rem 0.9rem; font-style: italic; margin-bottom: 0.9rem; background: rgba(139, 92, 246, 0.05); border-radius: 0 0.375rem 0.375rem 0; }
+    #report-content pre { background: rgba(15, 23, 42, 0.85); border: 1px solid rgba(255, 255, 255, 0.08); padding: 0.85rem; border-radius: 0.5rem; overflow-x: auto; margin-bottom: 0.9rem; font-size: 0.82rem; font-family: 'JetBrains Mono', monospace; }
+    #report-content code { background: rgba(139, 92, 246, 0.12); padding: 0.15rem 0.35rem; border-radius: 0.25rem; font-size: 0.85em; font-family: 'JetBrains Mono', monospace; }
+    #report-content table { width: 100%; border-collapse: collapse; margin-bottom: 1rem; font-size: 0.85rem; }
+    #report-content th { background: rgba(139, 92, 246, 0.08); padding: 0.5rem 0.75rem; text-align: left; border: 1px solid rgba(148, 163, 184, 0.2); font-weight: 600; }
+    #report-content td { padding: 0.5rem 0.75rem; border: 1px solid rgba(148, 163, 184, 0.15); }
     
     /* Estilos de Impressão Limpa */
     @media print {
-      header, #query-controls, #doc-quick-examples, #telemetry-bar, #chunks-column, nav, .no-print { display: none !important; }
+      header, #query-controls, #doc-quick-examples, #telemetry-bar, #chunks-column, nav, .no-print, #toast-container { display: none !important; }
       body { background: white !important; color: black !important; padding: 0; }
       #report-column { width: 100% !important; border: none !important; box-shadow: none !important; }
       #report-content { max-height: none !important; overflow: visible !important; color: black !important; }
@@ -201,18 +260,88 @@
 
       <!-- ÁREA DE RESULTADOS (RELATÓRIO & FONTES) -->
       <div id="results-area" class="grid grid-cols-1 lg:grid-cols-12 gap-6 hidden">
+
+        <!-- SKELETON LOADING STATE (Feedback Dinâmico da Pipeline em 5 Etapas) -->
+        <div id="results-skeleton" class="lg:col-span-12 space-y-4 py-2 hidden">
+          <div class="bg-white/90 dark:bg-dark-850/90 backdrop-blur border border-slate-200 dark:border-gray-800 rounded-2xl p-6 shadow-sm dark:shadow-xl space-y-5 animate-pulse">
+            <!-- Pipeline Stepper Status -->
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-100 dark:border-gray-800 pb-3">
+              <div class="flex items-center gap-2.5">
+                <span class="w-2.5 h-2.5 rounded-full bg-brand-500 animate-ping"></span>
+                <span id="skeleton-stage-text" class="text-xs font-bold text-brand-600 dark:text-brand-400 font-mono">
+                  Iniciando motor de recuperação em duas etapas...
+                </span>
+              </div>
+              <span class="text-[11px] text-slate-400 font-mono">SQLite FTS5 + FlashRank ONNX</span>
+            </div>
+
+            <!-- Stepper Indicators -->
+            <div class="grid grid-cols-2 sm:grid-cols-5 gap-2 text-center text-[11px] font-mono">
+              <div id="sk-step-1" class="p-2 rounded-lg bg-brand-50 dark:bg-brand-950/40 text-brand-600 dark:text-brand-400 border border-brand-300 dark:border-brand-800 transition">
+                <i class="fa-solid fa-bolt"></i><div class="mt-1">1. Cache</div>
+              </div>
+              <div id="sk-step-2" class="p-2 rounded-lg bg-slate-100 dark:bg-dark-900 text-slate-400 dark:text-gray-500 border border-slate-200 dark:border-gray-800 transition">
+                <i class="fa-solid fa-filter"></i><div class="mt-1">2. FTS5 BM25</div>
+              </div>
+              <div id="sk-step-3" class="p-2 rounded-lg bg-slate-100 dark:bg-dark-900 text-slate-400 dark:text-gray-500 border border-slate-200 dark:border-gray-800 transition">
+                <i class="fa-solid fa-microchip"></i><div class="mt-1">3. Mini-LLM</div>
+              </div>
+              <div id="sk-step-4" class="p-2 rounded-lg bg-slate-100 dark:bg-dark-900 text-slate-400 dark:text-gray-500 border border-slate-200 dark:border-gray-800 transition">
+                <i class="fa-solid fa-scissors"></i><div class="mt-1">4. Poda</div>
+              </div>
+              <div id="sk-step-5" class="p-2 rounded-lg bg-slate-100 dark:bg-dark-900 text-slate-400 dark:text-gray-500 border border-slate-200 dark:border-gray-800 transition">
+                <i class="fa-solid fa-pen-nib"></i><div class="mt-1">5. Síntese</div>
+              </div>
+            </div>
+
+            <!-- Shimmer Bars -->
+            <div class="space-y-3 pt-2">
+              <div class="h-4 bg-slate-200 dark:bg-gray-800 rounded-full w-3/4"></div>
+              <div class="h-3 bg-slate-200 dark:bg-gray-800 rounded-full w-full"></div>
+              <div class="h-3 bg-slate-200 dark:bg-gray-800 rounded-full w-5/6"></div>
+              <div class="h-3 bg-slate-200 dark:bg-gray-800 rounded-full w-4/5"></div>
+              <div class="h-3 bg-slate-200 dark:bg-gray-800 rounded-full w-11/12"></div>
+            </div>
+          </div>
+        </div>
         
         <!-- Coluna 1: Relatório Formatado -->
-        <div id="report-column" class="lg:col-span-8 bg-white dark:bg-dark-850 border border-slate-200 dark:border-gray-800 rounded-xl p-6 shadow-sm dark:shadow-xl flex flex-col transition-all duration-300">
+        <div id="report-column" class="lg:col-span-8 bg-white dark:bg-dark-850 border border-slate-200 dark:border-gray-800 rounded-2xl p-6 shadow-sm dark:shadow-xl flex flex-col relative overflow-hidden transition-all duration-300">
           
+          <!-- Barra de Progresso de Leitura Superior -->
+          <div id="reading-progress-bar" class="h-0.5 bg-gradient-to-r from-brand-500 via-purple-500 to-emerald-400 w-0 transition-all duration-150 absolute top-0 left-0 right-0"></div>
+
           <!-- Barra de Ações do Relatório -->
           <div class="flex flex-wrap items-center justify-between border-b border-slate-100 dark:border-gray-800 pb-4 mb-3 gap-2">
-            <div class="flex items-center gap-2">
-              <i class="fa-solid fa-file-lines text-brand-500"></i>
-              <h2 class="font-bold text-slate-900 dark:text-white text-base" data-i18n="reportTitle">Relatório Técnico Canônico</h2>
+            <div class="flex items-center gap-2.5">
+              <span class="w-7 h-7 rounded-lg bg-brand-50 dark:bg-brand-950/60 text-brand-600 dark:text-brand-400 flex items-center justify-center text-xs">
+                <i class="fa-solid fa-file-lines"></i>
+              </span>
+              <div>
+                <h2 class="font-bold text-slate-900 dark:text-white text-base leading-none" data-i18n="reportTitle">Relatório Técnico Canônico</h2>
+                <span id="report-reading-stats" class="text-[11px] font-mono text-slate-400 dark:text-gray-500 mt-0.5 block hidden"></span>
+              </div>
             </div>
             
-            <div class="flex items-center gap-2">
+            <div class="flex flex-wrap items-center gap-1.5">
+              <span id="llm-badge" class="text-[11px] px-2.5 py-1 rounded-lg bg-slate-100 dark:bg-dark-900 text-slate-700 dark:text-gray-300 border border-slate-200 dark:border-gray-700 font-mono"></span>
+              
+              <!-- Ajuste de Tamanho da Fonte (A- / A+) -->
+              <div class="flex items-center rounded-lg border border-slate-200 dark:border-gray-800 bg-slate-50 dark:bg-dark-900 p-0.5 text-xs font-mono">
+                <button onclick="adjustReportFontSize(-1)" class="px-2 py-0.5 rounded text-slate-600 dark:text-gray-400 hover:text-brand-600 dark:hover:text-white transition" title="Diminuir fonte">
+                  A-
+                </button>
+                <button onclick="adjustReportFontSize(1)" class="px-2 py-0.5 rounded text-slate-600 dark:text-gray-400 hover:text-brand-600 dark:hover:text-white transition" title="Aumentar fonte">
+                  A+
+                </button>
+              </div>
+
+              <!-- Botão Ocultar / Expandir Chunks -->
+              <button onclick="toggleSourcesColumn()" id="btn-toggle-sources" 
+                      class="text-xs bg-slate-100 hover:bg-slate-200 dark:bg-dark-900 dark:hover:bg-dark-800 text-slate-700 dark:text-gray-300 px-3 py-1.5 rounded-lg border border-slate-200 dark:border-gray-800 transition flex items-center gap-1.5 cursor-pointer"
+                      title="Ocultar ou Exibir painel de trechos fontes">
+                <i class="fa-solid fa-arrows-split-up-and-left"></i> <span id="toggle-sources-text" data-i18n="hideSources">Ocultar Fontes</span>
+              </button>
               <span id="llm-badge" class="text-[11px] px-2.5 py-1 rounded bg-slate-100 dark:bg-gray-800 text-slate-700 dark:text-gray-300 border border-slate-200 dark:border-gray-700 font-mono"></span>
               
               <!-- Botão Ocultar / Expandir Chunks -->
@@ -771,6 +900,87 @@
 
   <!-- SCRIPT PRINCIPAL: I18N, TEMAS, RAG & INTERFACE -->
   <script>
+
+    // SISTEMA DE TOAST NOTIFICATIONS (Design System Feedback)
+    function showToast(title, message = '', type = 'success', duration = 3500) {
+      const container = document.getElementById('toast-container');
+      if (!container) return;
+
+      const icons = {
+        success: 'fa-circle-check text-emerald-500',
+        info: 'fa-bolt text-brand-500',
+        warning: 'fa-triangle-exclamation text-amber-500',
+        error: 'fa-circle-exclamation text-rose-500'
+      };
+
+      const borders = {
+        success: 'border-emerald-500/30 dark:border-emerald-500/40',
+        info: 'border-brand-500/30 dark:border-brand-500/40',
+        warning: 'border-amber-500/30 dark:border-amber-500/40',
+        error: 'border-rose-500/30 dark:border-rose-500/40'
+      };
+
+      const toast = document.createElement('div');
+      toast.className = `pointer-events-auto transform transition-all duration-300 translate-y-3 opacity-0 flex items-start gap-3 p-3.5 rounded-xl bg-white/95 dark:bg-dark-800/95 backdrop-blur-md shadow-xl border ${borders[type] || borders.info} text-slate-800 dark:text-gray-200 text-xs w-full max-w-sm`;
+
+      toast.innerHTML = `
+        <div class="text-base mt-0.5"><i class="fa-solid ${icons[type] || icons.info}"></i></div>
+        <div class="flex-1">
+          <div class="font-bold text-slate-900 dark:text-white">${title}</div>
+          ${message ? `<div class="text-slate-500 dark:text-gray-400 mt-0.5 text-[11px] leading-relaxed">${message}</div>` : ''}
+        </div>
+        <button onclick="this.parentElement.remove()" class="text-slate-400 hover:text-slate-600 dark:hover:text-gray-200 transition text-sm">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      `;
+
+      container.appendChild(toast);
+      requestAnimationFrame(() => {
+        toast.classList.remove('translate-y-3', 'opacity-0');
+        toast.classList.add('translate-y-0', 'opacity-100');
+      });
+
+      setTimeout(() => {
+        toast.classList.remove('translate-y-0', 'opacity-100');
+        toast.classList.add('translate-y-3', 'opacity-0');
+        setTimeout(() => toast.remove(), 300);
+      }, duration);
+    }
+
+    // AJUSTE DE TAMANHO DA FONTE DO RELATÓRIO (A- / A+)
+    let reportFontSizeIndex = 1; // 0: text-xs, 1: text-sm (default), 2: text-base, 3: text-lg
+    const reportFontSizes = ['text-xs', 'text-sm', 'text-base', 'text-lg'];
+
+    function adjustReportFontSize(delta) {
+      reportFontSizeIndex = Math.max(0, Math.min(reportFontSizes.length - 1, reportFontSizeIndex + delta));
+      const el = document.getElementById('report-content');
+      if (!el) return;
+      reportFontSizes.forEach(s => el.classList.remove(s));
+      el.classList.add(reportFontSizes[reportFontSizeIndex]);
+    }
+
+    // BARRA DE PROGRESSO DE LEITURA
+    function updateReadingProgress() {
+      const content = document.getElementById('report-content');
+      const bar = document.getElementById('reading-progress-bar');
+      if (!content || !bar) return;
+      const scrollTop = content.scrollTop;
+      const scrollHeight = content.scrollHeight - content.clientHeight;
+      const progress = scrollHeight > 0 ? (scrollTop / scrollHeight) * 100 : 0;
+      bar.style.width = `${progress}%`;
+    }
+
+    // CONTADOR DE PALAVRAS E TEMPO ESTIMADO DE LEITURA
+    function updateReportWordCount(text) {
+      const badge = document.getElementById('report-reading-stats');
+      if (!badge || !text) return;
+      const words = text.trim().split(/\s+/).filter(w => w.length > 0).length;
+      const minutes = Math.max(1, Math.ceil(words / 220));
+      const t = translations[currentLang];
+      badge.textContent = `${words} ${t.words || 'palavras'} • ~${minutes} min ${t.readingTime || 'de leitura'}`;
+      badge.classList.remove('hidden');
+    }
+
     let appConfig = null;
     let currentRawReport = "";
     let currentQuery = "";
@@ -869,6 +1079,21 @@
         tr5Label: "Tempo de Inicialização (Cold Start)",
         tr6Label: "Infraestrutura e Banco de Dados",
         tr7Label: "Portabilidade e Backup",
+        toastEmptyQueryTitle: "Pergunta Vazia",
+        toastEmptyQueryDesc: "Por favor, digite sua pergunta ou selecione um dos exemplos acima.",
+        toastNoReportTitle: "Nenhum Relatório",
+        toastNoReportDesc: "Gere uma consulta primeiro antes de exportar ou copiar.",
+        words: "palavras",
+        readingTime: "de leitura",
+        skStep1: "1. Verificando Cache Semântico Local...",
+        skStep2: "2. Varredura SQLite FTS5 BM25 em 60.000+ chunks...",
+        skStep3: "3. Mini-LLM FlashRank ONNX cross-encoding na CPU...",
+        skStep4: "4. Poda extrativa de sentenças (-70% tokens)...",
+        skStep5: "5. Gateway LLM sintetizando resposta canônica...",
+        toastSuccessGen: "Relatório técnico gerado com sucesso!",
+        toastCacheHitGen: "Resposta servida instantaneamente do Cache Local (0 Tokens)!",
+        toastErrorGen: "Falha ao processar consulta:",
+        chunkScore: "Relevância:",
       },
       en: {
         tagline: "Two-Stage Universal RAG Engine & FlashRank Mini-LLM",
@@ -959,6 +1184,21 @@
         tr5Label: "Cold Start Time",
         tr6Label: "Database & Infrastructure Stack",
         tr7Label: "Portability & Backups",
+        toastEmptyQueryTitle: "Empty Inquiry",
+        toastEmptyQueryDesc: "Please enter your technical question or pick an example above.",
+        toastNoReportTitle: "No Report Available",
+        toastNoReportDesc: "Generate a query report first before attempting to export or copy.",
+        words: "words",
+        readingTime: "read",
+        skStep1: "1. Checking Local Deterministic Semantic Cache...",
+        skStep2: "2. SQLite FTS5 BM25 scan across 60,000+ chunks...",
+        skStep3: "3. Local Mini-LLM FlashRank ONNX cross-encoding on CPU...",
+        skStep4: "4. Extractive sentence-level context pruning (-70% tokens)...",
+        skStep5: "5. LLM Gateway synthesizing canonical report...",
+        toastSuccessGen: "Technical report generated successfully!",
+        toastCacheHitGen: "Instant response served from Local Cache (0 Tokens)!",
+        toastErrorGen: "Failed to process query:",
+        chunkScore: "Score:",
       }
     };
 
@@ -1087,7 +1327,7 @@
 
     // Exportar Relatório para Arquivo Markdown (.md)
     function downloadReportMarkdown() {
-      if (!currentRawReport) return alert("Nenhum relatório gerado para download.");
+      if (!currentRawReport) { const t = translations[currentLang]; return showToast(t.toastNoReportTitle, t.toastNoReportDesc, "warning"); }
       const blob = new Blob([currentRawReport], { type: 'text/markdown;charset=utf-8;' });
       const url = URL.createObjectURL(blob);
       const link = document.createElement("a");
@@ -1540,14 +1780,67 @@
     }
 
     // Executar Consulta RAG
+    let skeletonTimer = null;
+
+    function animateSkeletonSteps() {
+      const t = translations[currentLang];
+      const stageText = document.getElementById('skeleton-stage-text');
+      const steps = [
+        { id: 'sk-step-1', text: t.skStep1 || '1. Verificando Cache Semântico Local...' },
+        { id: 'sk-step-2', text: t.skStep2 || '2. Varredura SQLite FTS5 BM25 em 60.000+ chunks...' },
+        { id: 'sk-step-3', text: t.skStep3 || '3. Mini-LLM FlashRank ONNX cross-encoding na CPU...' },
+        { id: 'sk-step-4', text: t.skStep4 || '4. Poda extrativa de sentenças (-70% tokens)...' },
+        { id: 'sk-step-5', text: t.skStep5 || '5. Gateway LLM sintetizando resposta canônica...' }
+      ];
+
+      // Reset steps style
+      steps.forEach((s, idx) => {
+        const el = document.getElementById(s.id);
+        if (el) {
+          el.className = idx === 0 
+            ? 'p-2 rounded-lg bg-brand-50 dark:bg-brand-950/40 text-brand-600 dark:text-brand-400 border border-brand-300 dark:border-brand-800 transition'
+            : 'p-2 rounded-lg bg-slate-100 dark:bg-dark-900 text-slate-400 dark:text-gray-500 border border-slate-200 dark:border-gray-800 transition';
+        }
+      });
+      if (stageText) stageText.textContent = steps[0].text;
+
+      let currentStep = 0;
+      skeletonTimer = setInterval(() => {
+        currentStep++;
+        if (currentStep < steps.length) {
+          const prevEl = document.getElementById(steps[currentStep - 1].id);
+          const currEl = document.getElementById(steps[currentStep].id);
+          if (prevEl) {
+            prevEl.className = 'p-2 rounded-lg bg-emerald-50 dark:bg-emerald-950/30 text-emerald-600 dark:text-emerald-400 border border-emerald-300 dark:border-emerald-800 transition';
+          }
+          if (currEl) {
+            currEl.className = 'p-2 rounded-lg bg-brand-50 dark:bg-brand-950/40 text-brand-600 dark:text-brand-400 border border-brand-300 dark:border-brand-800 transition font-bold';
+          }
+          if (stageText) stageText.textContent = steps[currentStep].text;
+        } else {
+          clearInterval(skeletonTimer);
+        }
+      }, 550);
+    }
+
     async function runQuery() {
       const query = document.getElementById('query-input').value.trim();
-      if (!query) return alert("Digite sua pergunta técnica para a consulta.");
+      const t = translations[currentLang];
+      if (!query) {
+        return showToast(t.toastEmptyQueryTitle, t.toastEmptyQueryDesc, "warning");
+      }
 
       currentQuery = query;
       const btn = document.getElementById('btn-run');
       btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> <span>Processando...</span>';
       btn.disabled = true;
+
+      // Ativar Skeleton Loader Imediato (Zero Frozen Screen)
+      document.getElementById('results-area').classList.remove('hidden');
+      document.getElementById('results-skeleton').classList.remove('hidden');
+      document.getElementById('report-column').classList.add('hidden');
+      document.getElementById('chunks-column').classList.add('hidden');
+      animateSkeletonSteps();
 
       const payload = {
         query: query,
@@ -1703,5 +1996,8 @@
     fetchSystemTelemetry();
     setInterval(fetchSystemTelemetry, 2000);
   </script>
+  <!-- TOAST NOTIFICATION CONTAINER (Design System Feedback) -->
+  <div id="toast-container" class="fixed bottom-5 right-5 z-50 flex flex-col gap-2.5 max-w-sm w-full pointer-events-none"></div>
+
 </body>
 </html>
